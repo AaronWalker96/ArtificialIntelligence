@@ -1,2 +1,2 @@
 # Artificial Intelligence
-A git repository for my Artificial Intelligence University module
+A git repository for Artificial Intelligence University module
