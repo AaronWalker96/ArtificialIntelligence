@@ -1,11 +1,37 @@
 ;;Solution for modeling Malaria mutations and treatment in NetLogo
 ;;Aaron Walker - Q5045715
+
+patches-own [ genome ]
+globals [ mal-genome genome-length ]
+
+to setup
+  clear-all
+  ask patches
+  [ set pcolor 2
+    if pxcor mod 2 = 0 [ set pcolor 3 ]
+    if pycor mod 2 = 0 [ set pcolor 4 ]
+    if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 5 ]
+    set genome generate-genome
+  ]
+
+  set genome-length 8
+end
+
+
+to-report generate-genome
+  report random 2
+end
+
+to go
+ask patch mouse-xcor mouse-ycor [ set mal-genome genome ]
+end
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
 10
-647
-448
+673
+474
 -1
 -1
 13.0
@@ -18,15 +44,60 @@ GRAPHICS-WINDOW
 1
 1
 1
--16
-16
--16
-16
+-17
+17
+-17
+17
 0
 0
 1
 ticks
 30.0
+
+BUTTON
+10
+17
+76
+50
+NIL
+setup
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+96
+19
+159
+52
+NIL
+go
+T
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+MONITOR
+17
+74
+135
+119
+Selected Genome
+mal-genome
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
