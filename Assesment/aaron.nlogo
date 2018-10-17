@@ -1,5 +1,5 @@
 ;;Solution for modeling Malaria mutations and treatment in NetLogo
-;;Aaron Walker - Q5045715
+;;Last updated 17/10/2018 by Aaron Walker - Q5045715
 
 patches-own [ genome ]                                           ;;Patches own a list of bits representing a binary genome
 globals [ mal-genome ]
