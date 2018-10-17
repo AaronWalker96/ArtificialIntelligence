@@ -1,12 +1,11 @@
 ;;Solution for modeling Malaria mutations and treatment in NetLogo
 ;;Aaron Walker - Q5045715
 
-patches-own [ genome ]
-globals [ mal-genome genome-count ]
+patches-own [ genome ]                                           ;;Patches own a list of bits representing a binary genome
+globals [ mal-genome ]
 
 to setup
   clear-all
-  set genome-count 8                                             ;;Number of bits in genome
   setup-patches
 end
 
@@ -21,21 +20,17 @@ to setup-patches                                                 ;;Colour patche
 end
 
 to-report generate-genome                                        ;;Generate a random binary genome that is as long as specified by the genome-count global
-  let new-genome ""
+  let new-genome (list)                                          ;;Make a new list to store the genome bits
   loop
-  [ if length new-genome = genome-count [ report new-genome ]
-    set new-genome word new-genome random 2
+  [ if length new-genome = genome-length [ report new-genome ]
+    set new-genome lput random 2 new-genome
   ]
 end
 
 to go
-  ask patch mouse-xcor mouse-ycor [ set mal-genome genome ]      ;;Update "selected genome" display
-
-  if mouse-down?                                                 ;;Kill malaria patch when clicked and generate a new genome
-  [ ask patch mouse-xcor mouse-ycor
-    [ set genome "dead"                                          ;;Remove genome
-      set genome get-neighbor-genome
-    ]
+  ask patch mouse-xcor mouse-ycor [ set mal-genome genome ]      ;;Update "selected genome"
+  if mouse-down?
+  [ ask patch mouse-xcor mouse-ycor [ reproduce-mal ]            ;;Kill malaria patch when clicked and generate a new genome
   ]
 end
 
@@ -45,6 +40,18 @@ to-report get-neighbor-genome                                    ;;Get the genom
   report neighbor-genome
 end
 
+to reproduce-mal                                                 ;;Get a random neighbor malaria to asexually reproduce with a chance of mutation
+  let res ""
+  ifelse kill
+  [ set res get-neighbor-genome ]
+  [ set res genome ]
+
+  set genome map                                                 ;;Set current genome to results of...
+  [ gen -> ifelse-value (random-float 100.0 < mutation)          ;;If random number is less than mutation value
+    [ 1 - gen ]                                                  ;;Value if true
+    [ gen ]                                                      ;;Value if false
+  ] res                                                          ;;Run map on random neighbor(8) genome or current genome (Dependant on kill switch)
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -74,10 +81,10 @@ ticks
 30.0
 
 BUTTON
-10
-17
-76
-50
+18
+11
+73
+44
 NIL
 setup
 NIL
@@ -91,10 +98,10 @@ NIL
 1
 
 BUTTON
-96
-19
-159
-52
+134
+11
+189
+44
 NIL
 go
 T
@@ -108,15 +115,83 @@ NIL
 1
 
 MONITOR
-17
-74
-135
-119
+692
+11
+810
+56
 Selected Genome
 mal-genome
 17
 1
 11
+
+SLIDER
+18
+56
+190
+89
+genome-length
+genome-length
+0
+16
+8.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+18
+102
+190
+135
+mutation
+mutation
+0
+1.0
+0.3
+0.1
+1
+NIL
+HORIZONTAL
+
+BUTTON
+76
+11
+131
+44
+NIL
+go
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+SWITCH
+20
+147
+123
+180
+kill
+kill
+0
+1
+-1000
+
+TEXTBOX
+21
+190
+171
+386
+If \"kill\" switch is set to \"off\", the malaria will mutate when clicked.\n\nIf the \"kill\" switch is set to \"on\" the malaria will be killed when clicked and a random neighbor (8) will asexually reproduce to replace it. During this process there may be a mutation that you can adjust with the \"mutation\" slider
+11
+0.0
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
