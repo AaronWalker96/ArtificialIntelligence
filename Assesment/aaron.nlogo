@@ -2,7 +2,7 @@
 ;;Last updated 17/10/2018 by Aaron Walker - Q5045715
 
 patches-own [ genome ]                                           ;;Patches own a list of bits representing a binary genome
-globals [ mal-genome ]
+globals [ mal-genome treatment-genome ]
 
 to setup
   clear-all
@@ -17,6 +17,7 @@ to setup-patches                                                 ;;Colour patche
     if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 2 ]
     set genome generate-genome                                   ;;Generate a random genome
   ]
+  set treatment-genome generate-genome
 end
 
 to-report generate-genome                                        ;;Generate a random binary genome that is as long as specified by the genome-count global
@@ -41,16 +42,26 @@ to-report get-neighbor-genome                                    ;;Get the genom
 end
 
 to reproduce-mal                                                 ;;Get a random neighbor malaria to asexually reproduce with a chance of mutation
-  let res ""
-  ifelse kill
-  [ set res get-neighbor-genome ]
-  [ set res genome ]
+  let res ""                                                     ;;Declare empty string
+  ifelse kill                                                    ;;If kill switch active
+  [ set res get-neighbor-genome ]                                ;;Perform mutation on neighbor genome (kill and reproduce)
+  [ set res genome ]                                             ;;Else perform mutation on own genome (mutate)
 
   set genome map                                                 ;;Set current genome to results of...
-  [ gen -> ifelse-value (random-float 100.0 < mutation)          ;;If random number is less than mutation value
+  [ gen -> ifelse-value (random-float 100.0 < mutation)          ;;If random number is less than mutation value (of each bit in genome)
     [ 1 - gen ]                                                  ;;Value if true
     [ gen ]                                                      ;;Value if false
   ] res                                                          ;;Run map on random neighbor(8) genome or current genome (Dependant on kill switch)
+end
+
+to apply-treatment                                               ;;NOT COMPLETE
+  let comparitor (list)
+  ask patches
+  [ set comparitor (map != genome treatment-genome)
+    if length filter [ true ] (comparitor) < 5
+    [ set pcolor red ]
+  ]
+  show comparitor
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -117,7 +128,7 @@ NIL
 MONITOR
 692
 11
-810
+824
 56
 Selected Genome
 mal-genome
@@ -149,7 +160,7 @@ mutation
 mutation
 0
 1.0
-0.3
+0.2
 0.1
 1
 NIL
@@ -179,7 +190,7 @@ SWITCH
 180
 kill
 kill
-0
+1
 1
 -1000
 
@@ -191,6 +202,34 @@ TEXTBOX
 If \"kill\" switch is set to \"off\", the malaria will mutate when clicked.\n\nIf the \"kill\" switch is set to \"on\" the malaria will be killed when clicked and a random neighbor (8) will asexually reproduce to replace it. During this process there may be a mutation that you can adjust with the \"mutation\" slider
 11
 0.0
+1
+
+MONITOR
+692
+75
+825
+120
+Treatment Genome
+treatment-genome
+17
+1
+11
+
+BUTTON
+692
+140
+826
+173
+Apply Treatment
+apply-treatment
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
 1
 
 @#$#@#$#@
