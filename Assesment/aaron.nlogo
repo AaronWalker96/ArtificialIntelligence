@@ -6,21 +6,21 @@ globals [ mal-genome genome-count ]
 
 to setup
   clear-all
-  set genome-count 8 ;;Number of bits in genome
+  set genome-count 8                                             ;;Number of bits in genome
   setup-patches
 end
 
-to setup-patches ;;Colour patches in a grid formation so they are easier to see, generate a random genome for each patch
+to setup-patches                                                 ;;Colour patches in a grid formation so they are easier to see, generate a random genome for each patch
   ask patches
   [ set pcolor 2
     if pxcor mod 2 = 0 [ set pcolor 3 ]
     if pycor mod 2 = 0 [ set pcolor 4 ]
     if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 2 ]
-    set genome generate-genome
+    set genome generate-genome                                   ;;Generate a random genome
   ]
 end
 
-to-report generate-genome
+to-report generate-genome                                        ;;Generate a random binary genome that is as long as specified by the genome-count global
   let new-genome ""
   loop
   [ if length new-genome = genome-count [ report new-genome ]
@@ -29,16 +29,22 @@ to-report generate-genome
 end
 
 to go
-  ask patch mouse-xcor mouse-ycor [ set mal-genome genome ] ;;Update "selected genome" display
+  ask patch mouse-xcor mouse-ycor [ set mal-genome genome ]      ;;Update "selected genome" display
 
-  if mouse-down? ;;Kill malaria patch when clicked and generate a new genome
+  if mouse-down?                                                 ;;Kill malaria patch when clicked and generate a new genome
   [ ask patch mouse-xcor mouse-ycor
-    [ set mal-genome genome
-
+    [ set genome "dead"                                          ;;Remove genome
+      set genome get-neighbor-genome
     ]
-
   ]
 end
+
+to-report get-neighbor-genome                                    ;;Get the genome of a random neighbor malaria parasite
+  let neighbor-genome ""
+  ask one-of neighbors [ set neighbor-genome genome ]
+  report neighbor-genome
+end
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
