@@ -6,26 +6,31 @@ globals [ mal-genome genome-length ]
 
 to setup
   clear-all
+  setup-patches
+  set genome-length 8
+end
+
+to setup-patches
   ask patches
   [ set pcolor 2
     if pxcor mod 2 = 0 [ set pcolor 3 ]
     if pycor mod 2 = 0 [ set pcolor 4 ]
-    if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 5 ]
-    set genome generate-genome
+    if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 2 ]
+    set genome word generate-genome generate-genome
   ]
-
-  set genome-length 8
 end
 
-
 to-report generate-genome
-  report random 2
+  report word rand-bit rand-bit
+end
+
+to-report rand-bit
+  report word random 2 random 2
 end
 
 to go
-ask patch mouse-xcor mouse-ycor [ set mal-genome genome ]
+  ask patch mouse-xcor mouse-ycor [ set mal-genome genome ] ;;Update "selected genome" display
 end
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
