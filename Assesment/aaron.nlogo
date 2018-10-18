@@ -54,14 +54,17 @@ to reproduce-mal                                                 ;;Get a random 
   ] res                                                          ;;Run map on random neighbor(8) genome or current genome (Dependant on kill switch)
 end
 
-to apply-treatment                                               ;;NOT COMPLETE
-  let comparitor (list)
+to apply-treatment                                               ;;Apply the treatment to the existing malaria and kill any that don't survive (set colour to red)
+  let comparitor (list)                                          ;;Declare new empty list
   ask patches
-  [ set comparitor (map != genome treatment-genome)
-    if length filter [ true ] (comparitor) < 5
+  [ set comparitor (map = genome treatment-genome)               ;;Compare each bit of the malaria genome to the treatment and put the true/false result in the new list
+    if length filter [ i -> i = true ] (comparitor) > treatment-effectiveness  ;;If the difference is > than the treatment effectiveness slider, kill the malaria (set colour to red)
     [ set pcolor red ]
   ]
   show comparitor
+end
+
+to replace-dead                                                  ;;Don't look at me
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -184,10 +187,10 @@ NIL
 1
 
 SWITCH
-20
-147
-123
-180
+18
+199
+121
+232
 kill
 kill
 1
@@ -195,10 +198,10 @@ kill
 -1000
 
 TEXTBOX
-21
-190
-171
-386
+19
+242
+169
+438
 If \"kill\" switch is set to \"off\", the malaria will mutate when clicked.\n\nIf the \"kill\" switch is set to \"on\" the malaria will be killed when clicked and a random neighbor (8) will asexually reproduce to replace it. During this process there may be a mutation that you can adjust with the \"mutation\" slider
 11
 0.0
@@ -231,6 +234,38 @@ NIL
 NIL
 NIL
 1
+
+BUTTON
+693
+192
+827
+225
+Reproduce
+replace-dead
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+SLIDER
+18
+149
+190
+182
+treatment-effectiveness
+treatment-effectiveness
+0
+8
+5.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
