@@ -1,12 +1,14 @@
 ;;Solution for modeling Malaria mutations and treatment in NetLogo
 ;;Last updated 17/10/2018 by Aaron Walker - Q5045715
 
-patches-own [ genome ]                                           ;;Patches own a list of bits representing a binary genome
+patches-own [ genome state ]                                           ;;Patches own a list of bits representing a binary genome and a state
 globals [ mal-genome treatment-genome ]
 
 to setup
   clear-all
+  reset-ticks
   setup-patches
+  set treatment-genome generate-genome
 end
 
 to setup-patches                                                 ;;Colour patches in a grid formation so they are easier to see, generate a random genome for each patch
@@ -16,8 +18,9 @@ to setup-patches                                                 ;;Colour patche
     if pycor mod 2 = 0 [ set pcolor 4 ]
     if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 2 ]
     set genome generate-genome                                   ;;Generate a random genome
+    set state "alive"                                            ;;Set the initial state of the malaira to 'alive'
   ]
-  set treatment-genome generate-genome
+
 end
 
 to-report generate-genome                                        ;;Generate a random binary genome that is as long as specified by the genome-count global
@@ -58,13 +61,24 @@ to apply-treatment                                               ;;Apply the tre
   let comparitor (list)                                          ;;Declare new empty list
   ask patches
   [ set comparitor (map = genome treatment-genome)               ;;Compare each bit of the malaria genome to the treatment and put the true/false result in the new list
-    if length filter [ i -> i = true ] (comparitor) > treatment-effectiveness  ;;If the difference is > than the treatment effectiveness slider, kill the malaria (set colour to red)
-    [ set pcolor red ]
+    if length filter [ i -> i = true ] (comparitor) < treatment-effectiveness  ;;If the difference is > than the treatment effectiveness slider, kill the malaria (set colour to red)
+    [ set pcolor red
+      set state "dead"
+    ]
   ]
   show comparitor
+  tick
 end
 
-to replace-dead                                                  ;;Don't look at me
+to replace-dead                                                  ;;Replace the malaria cells that have been killed off by the treatment
+  ask patches
+  [ if state = "dead" [ reproduce-mal ]                          ;;If the malaria dies, replace the dead cell by having an alive cell asexually reporoduce to keep a constant population
+    set pcolor 2                                                 ;;Re-colour the grid
+    if pxcor mod 2 = 0 [ set pcolor 3 ]
+    if pycor mod 2 = 0 [ set pcolor 4 ]
+    if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 2 ]
+    set state "alive"                                            ;;Set the state of the new malaria to "alive"
+  ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -163,7 +177,7 @@ mutation
 mutation
 0
 1.0
-0.2
+0.3
 0.1
 1
 NIL
@@ -193,7 +207,7 @@ SWITCH
 232
 kill
 kill
-1
+0
 1
 -1000
 
@@ -261,11 +275,29 @@ treatment-effectiveness
 treatment-effectiveness
 0
 8
-5.0
+7.0
 1
 1
 NIL
 HORIZONTAL
+
+PLOT
+696
+242
+896
+392
+Treatment Effectiveness
+Time
+Dead Malaria
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"Malaria Deaths" 1.0 0 -16777216 true "" "plot count patches with [ state = \"dead\" ]"
 
 @#$#@#$#@
 ## WHAT IS IT?
