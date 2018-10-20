@@ -2,7 +2,7 @@
 ;;Last updated 17/10/2018 by Aaron Walker - Q5045715
 
 patches-own [ genome state ]                                     ;;Patches own a list of bits representing a binary genome and a state
-globals [ mal-genome treatment-genome ]
+globals [ mal-genome treatment-genome attribute-1 attribute-2 attribute-3 attribute-4 ]
 
 to setup
   clear-all
@@ -31,11 +31,22 @@ to-report generate-genome                                        ;;Generate a ra
   ]
 end
 
-to go
-  ask patch mouse-xcor mouse-ycor [ set mal-genome genome ]      ;;Update "selected genome"
+to mouse-update
+  ask patch mouse-xcor mouse-ycor [ set mal-genome genome ]      ;;Update "selected genome" monitor
+  ask patch mouse-xcor mouse-ycor [ set attribute-1 sublist genome 0 8 ]      ;;Update "attribute-1" monitor
+  ask patch mouse-xcor mouse-ycor [ set attribute-2 sublist genome 8 16 ]      ;;Update "attribute-2" monitor
+  ask patch mouse-xcor mouse-ycor [ set attribute-3 sublist genome 16 24 ]      ;;Update "attribute-3" monitor
+  ask patch mouse-xcor mouse-ycor [ set attribute-4 sublist genome 24 32 ]      ;;Update "attribute-4" monitor
+
   if mouse-down?
   [ ask patch mouse-xcor mouse-ycor [ reproduce-mal ]            ;;Kill malaria patch when clicked and generate a new genome
   ]
+end
+
+to go                                                            ;;Start the kill/reproduce cycle of the malaria cells
+  apply-treatment
+  if ( count patches with [ state = "dead" ] = 0 ) [ stop ]      ;;Stop the 'go' button if the system has completed running
+  replace-dead
 end
 
 to-report get-neighbor-genome                                    ;;Get the genome of a random neighbor malaria parasite
@@ -73,10 +84,12 @@ end
 to replace-dead                                                  ;;Replace the malaria cells that have been killed off by the treatment
   ask patches
   [ if state = "dead" [ reproduce-mal ]                          ;;If the malaria dies, replace the dead cell by having an alive cell asexually reporoduce to keep a constant population
-    set pcolor 2                                                 ;;Re-colour the grid
-    if pxcor mod 2 = 0 [ set pcolor 3 ]
-    if pycor mod 2 = 0 [ set pcolor 4 ]
-    if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 2 ]
+    if state = "alive"
+    [ set pcolor 2                                               ;;Re-colour the grid
+      if pxcor mod 2 = 0 [ set pcolor 3 ]
+      if pycor mod 2 = 0 [ set pcolor 4 ]
+      if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 2 ]
+    ]
     set state "alive"                                            ;;Set the state of the new malaria to "alive"
   ]
 end
@@ -202,9 +215,9 @@ NIL
 
 SWITCH
 18
-199
+243
 121
-232
+276
 kill
 kill
 0
@@ -213,9 +226,9 @@ kill
 
 TEXTBOX
 19
-242
+286
 169
-438
+482
 If \"kill\" switch is set to \"off\", the malaria will mutate when clicked.\n\nIf the \"kill\" switch is set to \"on\" the malaria will be killed when clicked and a random neighbor (8) will asexually reproduce to replace it. During this process there may be a mutation that you can adjust with the \"mutation\" slider
 11
 0.0
@@ -275,7 +288,7 @@ treatment-effectiveness
 treatment-effectiveness
 0
 100
-55.0
+68.0
 1
 1
 NIL
@@ -298,6 +311,67 @@ false
 "" ""
 PENS
 "Malaria Deaths" 1.0 0 -16777216 true "" "plot count patches with [ state = \"dead\" ]"
+
+MONITOR
+1085
+10
+1191
+55
+Attribute 1
+attribute-1
+17
+1
+11
+
+MONITOR
+1206
+10
+1312
+55
+Attribute 2
+attribute-2
+17
+1
+11
+
+MONITOR
+1085
+76
+1191
+121
+Attribute 3
+attribute-3
+17
+1
+11
+
+MONITOR
+1207
+76
+1313
+121
+Attribute 4
+attribute-4
+17
+1
+11
+
+BUTTON
+18
+196
+136
+229
+Mouse update
+mouse-update
+T
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
