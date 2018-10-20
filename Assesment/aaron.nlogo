@@ -1,7 +1,7 @@
 ;;Solution for modeling Malaria mutations and treatment in NetLogo
 ;;Last updated 17/10/2018 by Aaron Walker - Q5045715
 
-patches-own [ genome state ]                                           ;;Patches own a list of bits representing a binary genome and a state
+patches-own [ genome state ]                                     ;;Patches own a list of bits representing a binary genome and a state
 globals [ mal-genome treatment-genome ]
 
 to setup
@@ -61,12 +61,12 @@ to apply-treatment                                               ;;Apply the tre
   let comparitor (list)                                          ;;Declare new empty list
   ask patches
   [ set comparitor (map = genome treatment-genome)               ;;Compare each bit of the malaria genome to the treatment and put the true/false result in the new list
-    if length filter [ i -> i = true ] (comparitor) < treatment-effectiveness  ;;If the difference is > than the treatment effectiveness slider, kill the malaria (set colour to red)
+    if (( length filter [ i -> i = true ] (comparitor) / length comparitor ) * 100 )  < treatment-effectiveness  ;;If the difference is > than the treatment effectiveness slider, kill the malaria (set colour to red)
     [ set pcolor red
       set state "dead"
     ]
   ]
-  show comparitor
+
   tick
 end
 
@@ -145,7 +145,7 @@ NIL
 MONITOR
 692
 11
-824
+1038
 56
 Selected Genome
 mal-genome
@@ -161,8 +161,8 @@ SLIDER
 genome-length
 genome-length
 0
-16
-8.0
+32
+32.0
 1
 1
 NIL
@@ -224,7 +224,7 @@ If \"kill\" switch is set to \"off\", the malaria will mutate when clicked.\n\nI
 MONITOR
 692
 75
-825
+1038
 120
 Treatment Genome
 treatment-genome
@@ -274,8 +274,8 @@ SLIDER
 treatment-effectiveness
 treatment-effectiveness
 0
-8
-7.0
+100
+55.0
 1
 1
 NIL
