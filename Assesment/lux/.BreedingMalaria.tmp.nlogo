@@ -30,7 +30,7 @@ to-report genome-sequence-creator
   ]
 end
 
-to-report simple-swap-breed [genomeIn]
+to- simple-swap-breed [genomeIn]
 
   let glength length genomeIn - 1
   let swap-start-point  random(glength)
