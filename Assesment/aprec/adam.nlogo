@@ -1,57 +1,82 @@
-;;;;;;;; INCLUDES ;;;;;;;;
+globals [
+  anti-age
+  anti-fingerprint
+  anti-active
+]
 
-__includes [ "aprec_logg.nls" ]
+breed [malaria malarium]
 
+malaria-own [
+  age
+  fingerprint
+  fertile
+]
 
+;;;;;;;;
 
-;;;;;;;; TEMP BREEDS ;;;;;;;;
-
-breed [coins coin]
-breed [marios mario]
-
-marios-own [score]
-
-
-
-;;;;;;;; UI TO LOGGER LINKS ;;;;;;;;
-
-to gogg
-  	logg_csv [1 2 3 "test"]
-end
-
-to cleargg
-	logg_clr
-end
-
-
-
-;;;;;;;; DEMO CODE ;;;;;;;;
-
-to demo-setup
+to setup
   clear-all
-  ask patches [set pcolor grey]
-  demo-setup-coins
-  demo-setup-marios
+  setup-malaria
+  setup-anti
+  reset-ticks
 end
 
-to demo-setup-coins
-  create-coins 16
-  ask coins [
-    set shape "star"
-    set color yellow
-  ]
+; Create a new malaria on each patch
+; Has random age between 1 and 99
+; Has randomly generated fingerprint
+; Is set to fertile
+to setup-malaria
 end
 
-to demo-setup-marios
-  create-marios 4
-  ask marios [
-    set score 0
-    set color red
-  ]
+; Set anti globals up..
+; Set anti age
+; Generate anti fingerprint
+; Set anti active to true
+to setup-anti
 end
 
-to demo-go
+;;;;;;;;
+
+to go
+  go-malaria-age
+  go-malaria-kill
+  go-malaria-spawn
+  go-anti-update
+  go-anti-apply
+  tick
 end
+
+; For each malaria, add between 0 and malaria-age-add-max to malaria age
+to go-malaria-age
+end
+
+; For each malaria over malaria-max-age, kill
+to go-malaria-kill
+end
+
+; For each patch without malaria..
+; Spawn new malaria w' age 1, fertile true, and..
+; Copy fingerprint from randomly selected fertile malaria
+; For each bit, use malaria-mutation-size for % chance to mutate
+to go-malaria-spawn
+end
+
+; Increase age of anti
+; If age over anti-lifespan, set inactive
+; If age over new-anti-freq..
+; Generate new fingerprint amd reset age & active
+to go-anti-update
+end
+
+; If anti=active is false, just return
+; Otherwise..
+; Check each malaria fingerprint against anti fingerprint
+; If match is greater than anti-infect-match, set malaria fertile to false
+to go-anti-apply
+end
+
+;;;;;;;;
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -80,97 +105,274 @@ GRAPHICS-WINDOW
 ticks
 30.0
 
-OUTPUT
-654
-10
-1868
-448
-11
+BUTTON
+12
+15
+76
+48
+Setup
+setup
+NIL
+1
+T
+OBSERVER
+NIL
+S
+NIL
+NIL
+1
 
 BUTTON
-42
-21
-105
-54
+97
+15
+160
+48
+Run
+go
+T
+1
+T
+OBSERVER
 NIL
+G
+NIL
+NIL
+1
+
+BUTTON
+97
+55
+160
+88
+Step
 go
 NIL
 1
 T
 OBSERVER
 NIL
-NIL
+T
 NIL
 NIL
 1
 
-BUTTON
-52
-83
-115
-116
-NIL
-clear
-NIL
+SLIDER
+666
+154
+871
+187
+malaria-age-add-max
+malaria-age-add-max
+0
+10
+1.0
 1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
+1
+age
+HORIZONTAL
+
+SLIDER
+668
+284
+840
+317
+anti-infect-match
+anti-infect-match
+0
+100
+75.0
+1
+1
+%
+HORIZONTAL
+
+SLIDER
+663
+32
+835
+65
+fingerprint-size
+fingerprint-size
+0
+64
+8.0
+1
+1
+bit
+HORIZONTAL
+
+SLIDER
+669
+324
+841
+357
+anti-lifespan
+anti-lifespan
+0
+64
+16.0
+1
+1
+tick
+HORIZONTAL
+
+SLIDER
+668
+364
+840
+397
+new-anti-freq
+new-anti-freq
+0
+256
+64.0
+1
+1
+tick
+HORIZONTAL
+
+SLIDER
+666
+197
+850
+230
+malaria-mutation-size
+malaria-mutation-size
+0
+100
+10.0
+1
+1
+%
+HORIZONTAL
+
+SLIDER
+667
+112
+839
+145
+malaria-age-max
+malaria-age-max
+0
+64
+16.0
+1
+1
+age
+HORIZONTAL
+
+TEXTBOX
+666
+15
+816
+33
+Set the global fingerprint size
+11
+0.0
 1
 
-BUTTON
-66
-290
-168
-323
-Demo: setup
-demo_setup
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
+TEXTBOX
+668
+92
+818
+110
+Set properties of malaria
+11
+0.0
 1
 
-BUTTON
-68
-349
-162
-382
-Demo: loop
-demo_go
-T
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
+TEXTBOX
+670
+264
+820
+282
+Set properties of anti
+11
+0.0
 1
 
-BUTTON
-70
+PLOT
+956
+45
+1156
+195
+Malaria Infertility
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot count turtles"
+
+PLOT
+955
+226
+1155
+376
+Malaria differentiation
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot count turtles"
+
+MONITOR
+955
 402
-159
-435
-Demo: tick
-demo_go
-NIL
+1119
+447
+Average malaria fingerprint
+0
+17
 1
-T
-OBSERVER
+11
+
+PLOT
+1184
+47
+1384
+197
+Malaria evolutionary pressure
 NIL
 NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot count turtles"
+
+PLOT
+1186
+227
+1386
+377
+Anti effectiveness
 NIL
 NIL
-1
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot count turtles"
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -514,7 +716,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.1
+NetLogo 6.0.4
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@

@@ -1,0 +1,7 @@
+to logg_csv [#data]
+	output-print #data
+end
+
+to logg_clr
+	clear-output
+end
