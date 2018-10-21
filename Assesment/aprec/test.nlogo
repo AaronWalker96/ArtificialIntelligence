@@ -8,15 +8,16 @@ __includes [ "aprec_logg.nls" ]
 
 breed [stars star]
 breed [marios mario]
+breed [goombas goomba]
 
-marios-own [score]
-
+marios-own [score health]
+goombas-own [wings]
 
 
 ;;;;;;;; UI TO LOGGER LINKS ;;;;;;;;
 
 to go
-  	logg_csv [1 2 3 "test"]
+  	logg_append 2 "test" ["This is some test data" 12]
 end
 
 to clear
@@ -29,14 +30,14 @@ end
 
 to demo-setup
   clear-all
-  ask patches [set pcolor grey]
   demo-setup-stars
+  demo-setup-goombas
   demo-setup-marios
   reset-ticks
 end
 
 to demo-setup-stars
-  create-stars 16
+  create-stars (ratio_marios * ratio_magnitude * 4)
   ask stars [
     set shape "star"
     set color yellow
@@ -45,23 +46,54 @@ to demo-setup-stars
 end
 
 to demo-setup-marios
-  create-marios 4
+  create-marios (ratio_marios * ratio_magnitude)
   ask marios [
     set score 0
+    set health 3
     set color red
+    setxy random-xcor random-ycor
+  ]
+end
+
+to demo-setup-goombas
+  create-goombas (ratio_goombas * ratio_magnitude)
+  ask goombas [
+    set wings random 1
+    set color brown
+    set shape "wolf 3"
     setxy random-xcor random-ycor
   ]
 end
 
 to demo-go
   if not any? stars [stop]
+  demo-move-goombas
   demo-move-marios
   tick
+end
+
+to demo-move-goombas
+  ask goombas [
+    if not any? marios [stop]
+    face nearest-of marios
+    wiggle
+    forward 0.4
+
+    if any? marios-here [
+      ifelse (random 1) > 0 [
+        ask marios-here [set score (score + 2)]
+        die
+      ][
+        ask marios-here [set health (health - 1)]
+      ]
+    ]
+  ]
 end
 
 to demo-move-marios
   ask marios [
     if not any? stars [stop]
+    if health < 1 [die]
     face nearest-of stars
     wiggle
     forward 0.25
@@ -123,49 +155,15 @@ ticks
 OUTPUT
 654
 10
-1407
+1075
 448
 11
 
 BUTTON
-42
-21
-105
-54
-NIL
-go
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-52
-83
-115
-116
-NIL
-clear
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-66
-290
-168
-323
+9
+10
+199
+43
 Demo: setup
 demo-setup
 NIL
@@ -179,10 +177,10 @@ NIL
 1
 
 BUTTON
-68
-349
-162
-382
+9
+51
+103
+84
 Demo: loop
 demo-go
 T
@@ -196,10 +194,10 @@ NIL
 1
 
 BUTTON
-70
-402
-159
-435
+110
+51
+199
+84
 Demo: tick
 demo-go
 NIL
@@ -211,6 +209,115 @@ NIL
 NIL
 NIL
 1
+
+SLIDER
+9
+127
+199
+160
+ratio_marios
+ratio_marios
+0
+16
+1.0
+.25
+1
+NIL
+HORIZONTAL
+
+SLIDER
+10
+167
+199
+200
+ratio_goombas
+ratio_goombas
+0
+16
+3.0
+.25
+1
+NIL
+HORIZONTAL
+
+SLIDER
+10
+207
+199
+240
+ratio_magnitude
+ratio_magnitude
+0
+8
+4.0
+.25
+1
+NIL
+HORIZONTAL
+
+PLOT
+1085
+10
+1285
+160
+Agent count
+Tick
+Count
+0.0
+1.0
+0.0
+1.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -2674135 true "" "plot count marios"
+"pen-1" 1.0 0 -1184463 true "" "plot count stars"
+"pen-2" 1.0 0 -6459832 true "" "plot count goombas"
+
+MONITOR
+1087
+176
+1174
+221
+NIL
+count marios
+17
+1
+11
+
+MONITOR
+1089
+231
+1189
+276
+NIL
+count goombas
+17
+1
+11
+
+MONITOR
+1091
+287
+1277
+332
+NIL
+count marios / count goombas
+17
+1
+11
+
+MONITOR
+1093
+344
+1150
+389
+NIL
+\"Hello\"
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -547,6 +654,13 @@ false
 Polygon -16777216 true false 253 133 245 131 245 133
 Polygon -7500403 true true 2 194 13 197 30 191 38 193 38 205 20 226 20 257 27 265 38 266 40 260 31 253 31 230 60 206 68 198 75 209 66 228 65 243 82 261 84 268 100 267 103 261 77 239 79 231 100 207 98 196 119 201 143 202 160 195 166 210 172 213 173 238 167 251 160 248 154 265 169 264 178 247 186 240 198 260 200 271 217 271 219 262 207 258 195 230 192 198 210 184 227 164 242 144 259 145 284 151 277 141 293 140 299 134 297 127 273 119 270 105
 Polygon -7500403 true true -1 195 14 180 36 166 40 153 53 140 82 131 134 133 159 126 188 115 227 108 236 102 238 98 268 86 269 92 281 87 269 103 269 113
+
+wolf 3
+false
+0
+Polygon -7500403 true true 105 180 75 180 45 75 45 0 105 45 195 45 255 0 255 75 225 180 195 180 165 300 135 300 105 180 75 180
+Polygon -16777216 true false 225 90 210 135 150 90
+Polygon -16777216 true false 75 90 90 135 150 90
 
 x
 false

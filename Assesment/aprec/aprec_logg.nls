@@ -1,5 +1,8 @@
-to logg_csv [#data]
-	output-print #data
+to logg_graph [#name #graph]
+end
+
+to logg_append [#tick #name #data]
+  	output-print #data "test"
 end
 
 to logg_clr
