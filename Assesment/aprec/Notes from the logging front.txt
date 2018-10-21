@@ -1,0 +1,31 @@
+Notes form the logging front
+
+- We can do logging by three ways
+	- Outputting to the terminal
+	- Drawing to in model graphs
+	- Dumping to CSV for later / more advnaced statistical analysis & processing
+
+- Review of each method
+	- Outputting to the terminal
+		- Good for quick debugging
+		- Messy for actual logging, not recommended
+	- Drawing to graphs
+		- Plug in really well ot Nlogo (almost like they were designed to)
+		- Great for real time runtime feedback
+		- Not permanent, data cannot be easily pulled out after fact and saved
+	- Dumping to CSV
+		- Perminent, written to file outside the model
+		- Logs need rotating else you write multiple runs to same file
+		- Requires third party processing to gain additional info
+		- Third party processing may be less painless than in netlogo processing
+
+- Improvements to logging
+	- It _may_ be possible to have the logger feed in model graphs, kill two birds w' one stone (if this can be done then I am confident it can be done wo' damaging decoupling)
+	- It _may_ be possible to timestamp and rotate the files in netlogo on clear command
+
+- Bigger questions
+	- Do these efforts into logging help aid the project
+	- Is it a waste of time to be doing our own logging or will it pay off in the long run and save us future pain
+	- What sort of data processing are we planning on doing on the mal model
+	- How will the captured data from the mal model help us understand the internal workins
+	- How well will the captured data help us answer the question?

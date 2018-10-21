@@ -74,7 +74,7 @@ end
 ;; demo go helpers
 
 to demo-log
-  logg-append ticks "test" (list(list count marios))
+  logg-append ticks "turtlecount" (list count marios count goombas count stars)
 end
 
 to demo-move-goombas

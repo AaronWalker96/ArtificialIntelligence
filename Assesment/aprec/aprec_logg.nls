@@ -24,7 +24,8 @@ to logg-append [#tick #name #data]
 end
 
 to logg-temppend [#tick #name #data]
-  csv:to-file word #name ".csv" #data
+  file-open word #name ".csv"
+  file-print csv:to-row #data
 end
 
 to logg-clr
@@ -41,6 +42,9 @@ end
 
 ;Concat string
 ;report word "te" word "st" "ing"
+
+;CSV write to file
+;csv:to-file word #name ".csv" #data
 
 
 ;;;;;;;; HELPER FUNCTIONS ;;;;;;;;
