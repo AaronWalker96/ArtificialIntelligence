@@ -1,0 +1,6 @@
+https://ccl.northwestern.edu/netlogo/docs/csv.html
+https://stackoverflow.com/questions/50958853/reading-a-csv-file-in-netlogo
+https://stackoverflow.com/questions/44310486/how-to-create-and-print-an-array#44310578
+https://ccl.northwestern.edu/netlogo/docs/array.html
+https://stackoverflow.com/questions/27601309/is-it-possible-to-concatenate-lists-by-including-one-list-in-another
+http://ccl.northwestern.edu/netlogo/docs/dictionary.html#file-print

@@ -1,10 +1,19 @@
+extensions [csv]
+
+
 to logg_graph [#name #graph]
 end
 
 to logg_append [#tick #name #data]
-  	output-print #data "test"
+  ;file-open #name
+  ;file-print #tick
+  output-print sentence #tick sentence #name #data
 end
 
 to logg_clr
 	clear-output
 end
+
+
+;;;;;;;; HELPER FUNCTIONS ;;;;;;;;
+

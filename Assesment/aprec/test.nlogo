@@ -16,6 +16,9 @@ goombas-own [wings]
 
 ;;;;;;;; UI TO LOGGER LINKS ;;;;;;;;
 
+to fwrite
+end
+
 to go
   	logg_append 2 "test" ["This is some test data" 12]
 end
@@ -67,9 +70,15 @@ end
 
 to demo-go
   if not any? stars [stop]
+  if not any? marios [stop]
   demo-move-goombas
   demo-move-marios
+  demo-log
   tick
+end
+
+to demo-log
+  logg_append ticks "test" count marios
 end
 
 to demo-move-goombas
@@ -80,7 +89,8 @@ to demo-move-goombas
     forward 0.4
 
     if any? marios-here [
-      ifelse (random 1) > 0 [
+      let winner one-of [0 1]
+      ifelse winner = 1 [
         ask marios-here [set score (score + 2)]
         die
       ][
@@ -171,7 +181,7 @@ NIL
 T
 OBSERVER
 NIL
-NIL
+S
 NIL
 NIL
 1
@@ -188,7 +198,7 @@ T
 T
 OBSERVER
 NIL
-NIL
+L
 NIL
 NIL
 1
@@ -205,7 +215,7 @@ NIL
 T
 OBSERVER
 NIL
-NIL
+T
 NIL
 NIL
 1
@@ -271,9 +281,9 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -2674135 true "" "plot count marios"
-"pen-1" 1.0 0 -1184463 true "" "plot count stars"
-"pen-2" 1.0 0 -6459832 true "" "plot count goombas"
+"Mario" 1.0 0 -2674135 true "" "plot count marios"
+"Star" 1.0 0 -1184463 true "" "plot count stars"
+"Goomba" 1.0 0 -6459832 true "" "plot count goombas"
 
 MONITOR
 1087
@@ -318,6 +328,23 @@ NIL
 17
 1
 11
+
+BUTTON
+18
+306
+82
+339
+NIL
+fwrite
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -668,7 +695,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.4
+NetLogo 6.0.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
