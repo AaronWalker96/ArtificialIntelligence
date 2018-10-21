@@ -14,7 +14,7 @@ goombas-own [wings]
 ;;;;;;;; UI TO LOGGER LINKS ;;;;;;;;
 
 to clear
-	logg_clr
+	logg-clr
 end
 
 
@@ -22,7 +22,7 @@ end
 
 to demo-setup
   clear-all
-  logg_setup
+  logg-setup
   demo-setup-stars
   demo-setup-goombas
   demo-setup-marios
@@ -74,7 +74,7 @@ end
 ;; demo go helpers
 
 to demo-log
-  logg_append ticks "test" count marios
+  logg-append ticks "test" (list(list count marios))
 end
 
 to demo-move-goombas

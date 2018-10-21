@@ -20,6 +20,11 @@ to logg-append [#tick #name #data]
   ;file-print #tick
   output-print sentence #tick sentence #name #data
   output-print csv:from-row "one,two,three"
+  logg-temppend #tick #name #data
+end
+
+to logg-temppend [#tick #name #data]
+  csv:to-file word #name ".csv" #data
 end
 
 to logg-clr
@@ -28,8 +33,33 @@ end
 
 ;;;;;;;; CODE SNIPS ;;;;;;;;
 
-;
+;Official CSV documentation
+;https://ccl.northwestern.edu/netlogo/docs/csv.html
+
+;Reads in CSV formatted data string and outputs as Nlogo object
+;output-print csv:from-row "one,two,three"
+
+;Concat string
+;report word "te" word "st" "ing"
 
 
 ;;;;;;;; HELPER FUNCTIONS ;;;;;;;;
 
+to-report append-word
+  report word "te" word "st" "ing"
+end
+
+to-report cp-append-word [w xs]
+  report map [[x] -> (word w " " x)] xs
+end
+
+to-report cp-append-words [ws xs]
+  report map [[w] -> cp-append-word w xs] ws
+end
+
+to cp-test
+  let ws ["turtle" "rabbit"]
+  let xs [0 1 4 8]
+  print cp-append-word item 0 ws xs
+  print cp-append-words ws xs
+end
