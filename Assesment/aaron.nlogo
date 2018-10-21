@@ -13,14 +13,21 @@ end
 
 to setup-patches                                                 ;;Colour patches in a grid formation so they are easier to see, generate a random genome for each patch
   ask patches
-  [ set pcolor 2
-    if pxcor mod 2 = 0 [ set pcolor 3 ]
-    if pycor mod 2 = 0 [ set pcolor 4 ]
-    if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 2 ]
-    set genome generate-genome                                   ;;Generate a random genome
+  [ set genome generate-genome                                   ;;Generate a random genome
     set state "alive"                                            ;;Set the initial state of the malaira to 'alive'
   ]
+  colour-grid
+end
 
+to colour-grid
+  ask patches
+  [ if state = "alive"
+    [ set pcolor 2
+      if pxcor mod 2 = 0 [ set pcolor 3 ]
+      if pycor mod 2 = 0 [ set pcolor 4 ]
+      if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 2 ]
+    ]
+  ]
 end
 
 to-report generate-genome                                        ;;Generate a random binary genome that is as long as specified by the genome-count global
@@ -45,6 +52,7 @@ end
 
 to go                                                            ;;Start the kill/reproduce cycle of the malaria cells
   apply-treatment
+  colour-grid
   if ( count patches with [ state = "dead" ] = 0 ) [ stop ]      ;;Stop the 'go' button if the system has completed running
   replace-dead
 end
@@ -82,14 +90,9 @@ to apply-treatment                                               ;;Apply the tre
 end
 
 to replace-dead                                                  ;;Replace the malaria cells that have been killed off by the treatment
+  colour-grid
   ask patches
   [ if state = "dead" [ reproduce-mal ]                          ;;If the malaria dies, replace the dead cell by having an alive cell asexually reporoduce to keep a constant population
-    if state = "alive"
-    [ set pcolor 2                                               ;;Re-colour the grid
-      if pxcor mod 2 = 0 [ set pcolor 3 ]
-      if pycor mod 2 = 0 [ set pcolor 4 ]
-      if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 2 ]
-    ]
     set state "alive"                                            ;;Set the state of the new malaria to "alive"
   ]
 end
