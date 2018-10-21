@@ -1,6 +1,6 @@
 phoney: none
 
-g:
+p:
 	git pull
 	git push
 
