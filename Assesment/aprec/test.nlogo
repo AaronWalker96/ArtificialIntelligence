@@ -6,7 +6,7 @@ __includes [ "aprec_logg.nls" ]
 
 ;;;;;;;; TEMP BREEDS ;;;;;;;;
 
-breed [coins coin]
+breed [stars star]
 breed [marios mario]
 
 marios-own [score]
@@ -15,11 +15,11 @@ marios-own [score]
 
 ;;;;;;;; UI TO LOGGER LINKS ;;;;;;;;
 
-to gogg
+to go
   	logg_csv [1 2 3 "test"]
 end
 
-to cleargg
+to clear
 	logg_clr
 end
 
@@ -30,15 +30,17 @@ end
 to demo-setup
   clear-all
   ask patches [set pcolor grey]
-  demo-setup-coins
+  demo-setup-stars
   demo-setup-marios
+  reset-ticks
 end
 
-to demo-setup-coins
-  create-coins 16
-  ask coins [
+to demo-setup-stars
+  create-stars 16
+  ask stars [
     set shape "star"
     set color yellow
+    setxy random-xcor random-ycor
   ]
 end
 
@@ -47,10 +49,48 @@ to demo-setup-marios
   ask marios [
     set score 0
     set color red
+    setxy random-xcor random-ycor
   ]
 end
 
 to demo-go
+  if not any? stars [stop]
+  demo-move-marios
+  tick
+end
+
+to demo-move-marios
+  ask marios [
+    if not any? stars [stop]
+    face nearest-of stars
+    wiggle
+    forward 0.25
+
+    if any? stars-here [
+      set score (score + 1)
+      ask stars-here [die]
+    ]
+  ]
+end
+
+
+;;;;;;;; SXL UTILS IMPORTED ;;;;;;;;
+
+to wiggle
+  right 45 - (random 90)
+end
+
+to-report nearest-of [#breed]
+  report min-one-of #breed [distance myself]
+end
+
+to-report trigger [#prob]
+  report (random 100) < #prob
+end
+
+to-report mutate [#val #mu]
+  let #mutator (random (#mu * 2 + 1)) - #mu
+  report (#val + #mutator)
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -83,7 +123,7 @@ ticks
 OUTPUT
 654
 10
-1868
+1407
 448
 11
 
@@ -127,7 +167,7 @@ BUTTON
 168
 323
 Demo: setup
-demo_setup
+demo-setup
 NIL
 1
 T
@@ -144,7 +184,7 @@ BUTTON
 162
 382
 Demo: loop
-demo_go
+demo-go
 T
 1
 T
@@ -161,7 +201,7 @@ BUTTON
 159
 435
 Demo: tick
-demo_go
+demo-go
 NIL
 1
 T
@@ -514,7 +554,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.1
+NetLogo 6.0.4
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
