@@ -2,8 +2,6 @@
 
 __includes [ "aprec_logg.nls" ]
 
-
-
 ;;;;;;;; TEMP BREEDS ;;;;;;;;
 
 breed [stars star]
@@ -13,31 +11,25 @@ breed [goombas goomba]
 marios-own [score health]
 goombas-own [wings]
 
-
 ;;;;;;;; UI TO LOGGER LINKS ;;;;;;;;
-
-to fwrite
-end
-
-to go
-  	logg_append 2 "test" ["This is some test data" 12]
-end
 
 to clear
 	logg_clr
 end
 
 
-
 ;;;;;;;; DEMO CODE ;;;;;;;;
 
 to demo-setup
   clear-all
+  logg_setup
   demo-setup-stars
   demo-setup-goombas
   demo-setup-marios
   reset-ticks
 end
+
+;; demo setup helpers
 
 to demo-setup-stars
   create-stars (ratio_marios * ratio_magnitude * 4)
@@ -68,6 +60,8 @@ to demo-setup-goombas
   ]
 end
 
+;; demo go
+
 to demo-go
   if not any? stars [stop]
   if not any? marios [stop]
@@ -76,6 +70,8 @@ to demo-go
   demo-log
   tick
 end
+
+;; demo go helpers
 
 to demo-log
   logg_append ticks "test" count marios
@@ -329,21 +325,14 @@ NIL
 1
 11
 
-BUTTON
-18
-306
-82
-339
-NIL
-fwrite
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
+TEXTBOX
+22
+248
+193
+299
+These are not TRUE magnitudes, just hacky ones for demo purposes
+12
+0.0
 1
 
 @#$#@#$#@
@@ -695,7 +684,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.1
+NetLogo 6.0.4
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@

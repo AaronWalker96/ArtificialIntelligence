@@ -1,18 +1,34 @@
+;Import CSV extension
 extensions [csv]
 
+;Define global variables
+globals [
+  lolvar
+]
 
-to logg_graph [#name #graph]
+
+;Call in proj setup function to init logger
+to logg-setup
+  logg-clr
 end
 
-to logg_append [#tick #name #data]
+to logg-graph [#name #graph]
+end
+
+to logg-append [#tick #name #data]
   ;file-open #name
   ;file-print #tick
   output-print sentence #tick sentence #name #data
+  output-print csv:from-row "one,two,three"
 end
 
-to logg_clr
+to logg-clr
 	clear-output
 end
+
+;;;;;;;; CODE SNIPS ;;;;;;;;
+
+;
 
 
 ;;;;;;;; HELPER FUNCTIONS ;;;;;;;;
