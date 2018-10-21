@@ -1,3 +1,5 @@
+phoney: none
+
 g:
 	git pull
 	git push
@@ -7,3 +9,6 @@ clr:
 
 s:
 	git status
+
+a:
+	git add -u

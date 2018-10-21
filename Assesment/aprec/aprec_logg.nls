@@ -24,8 +24,10 @@ to logg-append [#tick #name #data]
 end
 
 to logg-temppend [#tick #name #data]
+  let body fput #tick #data
   file-open word #name ".csv"
-  file-print csv:to-row #data
+  file-print csv:to-row body
+  file-close
 end
 
 to logg-clr
@@ -47,7 +49,7 @@ end
 ;csv:to-file word #name ".csv" #data
 
 
-;;;;;;;; HELPER FUNCTIONS ;;;;;;;;
+;;;;;;;; EXPERIMENTAL FUNCTIONS -- DO NOT USE IN PROD ;;;;;;;;
 
 to-report append-word
   report word "te" word "st" "ing"
