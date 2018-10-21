@@ -101,7 +101,6 @@ to new-treatment                                                 ;;Introduce a n
   set treatment-genome generate-genome                           ;;Generate a random genome for the starting treatment
 end
 
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
