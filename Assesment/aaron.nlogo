@@ -1,14 +1,14 @@
 ;;Solution for modeling Malaria mutations and treatment in NetLogo
-;;Last updated 17/10/2018 by Aaron Walker - Q5045715
+;;Last updated 21/10/2018 by Aaron Walker - Q5045715
 
 patches-own [ genome state ]                                     ;;Patches own a list of bits representing a binary genome and a state
 globals [ mal-genome treatment-genome attribute-1 attribute-2 attribute-3 attribute-4 ]
 
 to setup
-  clear-all
-  reset-ticks
-  setup-patches
-  set treatment-genome generate-genome
+  clear-all                                                      ;;Reset the model
+  reset-ticks                                                    ;;Reset ticks
+  setup-patches                                                  ;;Perform setup for patches
+  set treatment-genome generate-genome                           ;;Generate a random genome for the starting treatment
 end
 
 to setup-patches                                                 ;;Colour patches in a grid formation so they are easier to see, generate a random genome for each patch
@@ -19,7 +19,7 @@ to setup-patches                                                 ;;Colour patche
   colour-grid
 end
 
-to colour-grid
+to colour-grid                                                   ;;Set the colours of the grid so that it's easy to see individual patches
   ask patches
   [ if state = "alive"
     [ set pcolor 2
@@ -96,6 +96,12 @@ to replace-dead                                                  ;;Replace the m
     set state "alive"                                            ;;Set the state of the new malaria to "alive"
   ]
 end
+
+to new-treatment                                                 ;;Introduce a new treatment to the system
+  set treatment-genome generate-genome                           ;;Generate a random genome for the starting treatment
+end
+
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -251,27 +257,10 @@ treatment-genome
 BUTTON
 692
 140
-826
+879
 173
-Apply Treatment
-apply-treatment
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-693
-192
-827
-225
-Reproduce
-replace-dead
+Introduce New Treatment
+new-treatment
 NIL
 1
 T
