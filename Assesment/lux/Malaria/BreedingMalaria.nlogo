@@ -9,7 +9,12 @@ end
 
 ;;World Loop
 to go
-  if mouse-down? [ handle-mouse-down ]
+  ;;if mouse-down? [ handle-mouse-down ]
+  ;;Use the new breeding
+  ask Patches
+  [
+    set genome simple-swap-breed genome
+  show length genome]
 end
 
 to patches-setup

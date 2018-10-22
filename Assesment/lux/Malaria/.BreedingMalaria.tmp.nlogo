@@ -9,7 +9,9 @@ end
 
 ;;World Loop
 to go
-  if mouse-down? [ handle-mouse-down ]
+  ;;if mouse-down? [ handle-mouse-down ]
+  ;;Use the new breeding
+  ask Patches[set genome simple-swap-breed-ne genome]
 end
 
 to patches-setup
@@ -40,7 +42,7 @@ to handle-mouse-down
   ask curPat[show genome set currentMal genome]
   if single-bit? [set currentMal change-random-bit currentMal]
   if n-random? [set currentMal change-random-bit-n-times currentMal 16]
-  if swap? [set simple-swap-breed currentMal ]
+  if swap? [set currentMal simple-swap-breed currentMal ]
   set currentMal change-random-bit-n-times currentMal 16
   show currentMal
 
