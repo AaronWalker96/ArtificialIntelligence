@@ -1,3 +1,5 @@
+__includes["breeding.nls"]
+
 patches-own[genome]
 
 to setup
@@ -30,42 +32,17 @@ to-report genome-sequence-creator
   ]
 end
 
-to-report simple-swap-breed [genomeIn]
-
-  let glength length genomeIn - 1
-  let swap-start-point  random(glength)
-  let swap-end-point (swap-start-point + random (glength - swap-start-point)) + 1
-
-  let swap-partion reverse (sublist genomeIn swap-start-point swap-end-point)
-  let beginging-partion (list)
-  let end-partion (list)
-  let begining? 0
-  let end? 0
-  ;; if start = 0 then no beging if end = glenght no beinging
-  ifelse swap-start-point = 0 [set begining? 0][set begining? 1]
-  ifelse swap-end-point = glength [set end? 0][set end? 1]
-
-  if begining? = 1 [set beginging-partion sublist genomeIn 0 swap-start-point]
-  if end? = 1 [set end-partion sublist genomeIn swap-end-point (glength + 1)]
-
- ;; show swap-partion
- ;; show beginging-partion
- ;; show end-partion
-
-  let non-flat (list beginging-partion swap-partion end-partion)
-  let comp reduce sentence non-flat
-  ;;show comp
-
-  report comp
-end
-
 to handle-mouse-down
 
   ;;Gets patche closest to the mouse
   let curPat min-one-of patches [distancexy mouse-xcor mouse-ycor]
-  ask curPat[show genome simple-swap-breed genome]
-
-
+  let currentMal (List)
+  ask curPat[show genome set currentMal genome]
+  if single-bit? [set currentMal change-random-bit currentMal]
+  if n-random? [set currentMal change-random-bit-n-times currentMal 16]
+  if swap? [set currentMal simple-swap-breed currentMal ]
+  set currentMal change-random-bit-n-times currentMal 16
+  show currentMal
 
   while [mouse-down?] [ ]
 end
@@ -98,43 +75,10 @@ ticks
 30.0
 
 SWITCH
-15
-28
-139
-61
-Swapbreed?
-Swapbreed?
-1
-1
--1000
-
-SWITCH
-15
-61
-121
-94
-Transpos
-Transpos
-1
-1
--1000
-
-SWITCH
-15
-94
-127
-127
-Crossover
-Crossover
-1
-1
--1000
-
-SWITCH
-659
-23
-762
-56
+343
+459
+446
+492
 Mono?
 Mono?
 0
@@ -174,6 +118,39 @@ NIL
 NIL
 NIL
 1
+
+SWITCH
+7
+187
+121
+220
+n-random?
+n-random?
+1
+1
+-1000
+
+SWITCH
+7
+221
+110
+254
+swap?
+swap?
+1
+1
+-1000
+
+SWITCH
+8
+257
+119
+290
+single-bit?
+single-bit?
+1
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -517,7 +494,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.1
+NetLogo 6.0.4
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
