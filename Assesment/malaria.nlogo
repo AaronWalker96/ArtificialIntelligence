@@ -1,6 +1,9 @@
 ;;Solution for modeling Malaria mutations and treatment in NetLogo
 ;;Last updated 21/10/2018 by Aaron Walker - Q5045715
 
+__includes [ "breeding.nls" ]
+
+
 patches-own [ genome state ]                                     ;;Patches own a list of bits representing a binary genome and a state
 globals [ mal-genome treatment-genome attribute-1 attribute-2 attribute-3 attribute-4 ]
 
@@ -52,10 +55,10 @@ end
 
 to go                                                            ;;Start the kill/reproduce cycle of the malaria cells
   apply-treatment
+  tick
   colour-grid
   if ( count patches with [ state = "dead" ] = 0 ) [ stop ]      ;;Stop the 'go' button if the system has completed running
   replace-dead
-  tick
 end
 
 to-report get-neighbor-genome                                    ;;Get the genome of a random neighbor malaria parasite
@@ -70,11 +73,13 @@ to reproduce-mal                                                 ;;Get a random 
   [ set res get-neighbor-genome ]                                ;;Perform mutation on neighbor genome (kill and reproduce)
   [ set res genome ]                                             ;;Else perform mutation on own genome (mutate)
 
-  set genome map                                                 ;;Set current genome to results of...
-  [ gen -> ifelse-value (random-float 100.0 < mutation)          ;;If random number is less than mutation value (of each bit in genome)
-    [ 1 - gen ]                                                  ;;Value if true
-    [ gen ]                                                      ;;Value if false
-  ] res                                                          ;;Run map on random neighbor(8) genome or current genome (Dependant on kill switch)
+  set genome simple-swap-breed genome
+
+  ;;set genome map                                                 ;;Set current genome to results of...
+  ;;[ gen -> ifelse-value (random-float 100.0 < mutation)          ;;If random number is less than mutation value (of each bit in genome)
+  ;;  [ 1 - gen ]                                                  ;;Value if true
+  ;;  [ gen ]                                                      ;;Value if false
+  ;;] res                                                          ;;Run map on random neighbor(8) genome or current genome (Dependant on kill switch)
 end
 
 to apply-treatment                                               ;;Apply the treatment to the existing malaria and kill any that don't survive (set colour to red)
@@ -190,14 +195,14 @@ HORIZONTAL
 SLIDER
 18
 102
-190
+191
 135
 mutation
 mutation
 0
-1.0
-0.3
-0.1
+32
+8.0
+1
 1
 NIL
 HORIZONTAL
@@ -221,9 +226,9 @@ NIL
 
 SWITCH
 18
-243
-121
-276
+292
+192
+325
 kill
 kill
 0
@@ -232,9 +237,9 @@ kill
 
 TEXTBOX
 19
-286
+335
 169
-482
+531
 If \"kill\" switch is set to \"off\", the malaria will mutate when clicked.\n\nIf the \"kill\" switch is set to \"on\" the malaria will be killed when clicked and a random neighbor (8) will asexually reproduce to replace it. During this process there may be a mutation that you can adjust with the \"mutation\" slider
 11
 0.0
@@ -271,7 +276,7 @@ NIL
 SLIDER
 18
 149
-190
+191
 182
 treatment-effectiveness
 treatment-effectiveness
@@ -347,9 +352,9 @@ attribute-4
 
 BUTTON
 18
-196
-136
-229
+245
+192
+278
 Mouse update
 mouse-update
 T
@@ -361,6 +366,21 @@ NIL
 NIL
 NIL
 1
+
+SLIDER
+18
+196
+192
+229
+introduce-treatment
+introduce-treatment
+0
+1000
+200.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?

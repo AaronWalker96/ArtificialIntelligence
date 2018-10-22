@@ -1,4 +1,51 @@
-;;This will be the project template for modling humans with malaria
+__includes["breeding.nls"]
+
+patches-own[genome]
+
+to setup
+  clear-all
+  patches-setup
+end
+
+;;World Loop
+to go
+  if mouse-down? [ handle-mouse-down ]
+end
+
+to patches-setup
+  ask patches
+  [
+    ifelse mono? [set pcolor black
+    if pxcor mod 2 = 0 [ set pcolor white ]
+    if pycor mod 2 = 0 [ set pcolor white ]
+    if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor black  ]][set pcolor red]
+    set genome genome-sequence-creator                                            ;; Creates and returns a like of binary values of lenght 8
+  ]
+
+end
+
+to-report genome-sequence-creator
+  let temp-gen (list)                                                             ;;Creates a temp list
+  loop
+  [if length temp-gen = 32 [report temp-gen]                                       ;;uses the temp list to return a list of lentgh 8
+    set temp-gen lput one-of [0 1] temp-gen
+  ]
+end
+
+to handle-mouse-down
+
+  ;;Gets patche closest to the mouse
+  let curPat min-one-of patches [distancexy mouse-xcor mouse-ycor]
+  let currentMal (List)
+  ask curPat[show genome set currentMal genome]
+  if single-bit? [set currentMal change-random-bit currentMal]
+  if n-random? [set currentMal change-random-bit-n-times currentMal 16]
+  if swap? [set currentMal simple-swap-breed currentMal ]
+  set currentMal change-random-bit-n-times currentMal 16
+  show currentMal
+
+  while [mouse-down?] [ ]
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -26,6 +73,84 @@ GRAPHICS-WINDOW
 1
 ticks
 30.0
+
+SWITCH
+343
+459
+446
+492
+Mono?
+Mono?
+0
+1
+-1000
+
+BUTTON
+213
+459
+276
+492
+NIL
+setup
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+277
+459
+340
+492
+NIL
+go
+T
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+SWITCH
+7
+187
+121
+220
+n-random?
+n-random?
+1
+1
+-1000
+
+SWITCH
+7
+221
+110
+254
+swap?
+swap?
+1
+1
+-1000
+
+SWITCH
+8
+257
+119
+290
+single-bit?
+single-bit?
+1
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
