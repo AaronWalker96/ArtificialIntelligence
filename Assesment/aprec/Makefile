@@ -1,9 +1,10 @@
-phoney: none
+phoney: help
 
 help:
 	@echo "== MAKEFILE COMMANDS =="
 	@echo "make a -- Stage all tracked files for commit"
 	@echo "make clr -- Remove all cav files"
+	@echo "make help -- Displays this text"
 	@echo "make p -- sync w' remote"
 	@echo "make s -- List git status"
 

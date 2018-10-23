@@ -3,8 +3,27 @@ extensions [csv]
 
 ;Define global variables
 globals [
-  lolvar
+  files
 ]
+
+
+;About
+
+;aprec_logg is a Nlogo util to make loging data out from netlogo to csv files easy
+;In your setup function, call "logg-setup"
+;Then when you want to log something, call "logg-append <tick number> <log name> <log data (List)>"
+;Procedures beginning with "!" are internal and should not be called from yuour model
+
+
+
+;TODO
+
+;- Have log file datestamped
+;- Request for "agents.csv" should be redirected to "agents-ISODate.csv"
+
+;- Have ability for loggs to be graphed too
+;- Bind logg files to graphs and autofunnel data on call
+
 
 
 ;Call in proj setup function to init logger
@@ -15,15 +34,17 @@ end
 to logg-graph [#name #graph]
 end
 
-to logg-append [#tick #name #data]
-  ;file-open #name
-  ;file-print #tick
-  output-print sentence #tick sentence #name #data
-  output-print csv:from-row "one,two,three"
-  logg-temppend #tick #name #data
+to logg-rotate
 end
 
-to logg-temppend [#tick #name #data]
+;Call this procedure where you want to logg
+to logg-append [#tick #name #data]
+  output-print sentence #tick sentence #name #data
+  !logg-fwrite #tick #name #data
+end
+
+;Internal function - performs csv disk write
+to !logg-fwrite [#tick #name #data]
   let body fput #tick #data
   file-open word #name ".csv"
   file-print csv:to-row body
@@ -48,24 +69,7 @@ end
 ;CSV write to file
 ;csv:to-file word #name ".csv" #data
 
-
-;;;;;;;; EXPERIMENTAL FUNCTIONS -- DO NOT USE IN PROD ;;;;;;;;
-
-to-report append-word
-  report word "te" word "st" "ing"
-end
-
-to-report cp-append-word [w xs]
-  report map [[x] -> (word w " " x)] xs
-end
-
-to-report cp-append-words [ws xs]
-  report map [[w] -> cp-append-word w xs] ws
-end
-
-to cp-test
-  let ws ["turtle" "rabbit"]
-  let xs [0 1 4 8]
-  print cp-append-word item 0 ws xs
-  print cp-append-words ws xs
-end
+;Append words - testing
+;report word "te" word "st" "ing"
+;report map [[x] -> (word w " " x)] xs
+;report map [[w] -> cp-append-word w xs] ws
