@@ -1,8 +1,10 @@
 ;;Solution for modeling human infection and treatment of malaria in NetLogo
 ;;Last updated 21/10/2018 by Aaron Walker - Q5045715
 
+__includes [ "breeding.nls" ]
+
 patches-own [ genome state infected-time life ]                       ;;Patches own a list of bits representing a binary genome and a state
-globals [ mal-genome treatment]
+globals [ treatment ]
 
 to setup
   clear-all                                                      ;;Reset the model
@@ -13,7 +15,7 @@ end
 
 to setup-patches                                                 ;;Colour patches in a grid formation so they are easier to see, generate a random genome for each patch
   ask patches
-  [ set genome generate-genome                                   ;;Generate a random genome
+  [ ;;set genome generate-genome                                   ;;Generate a random genome
     set state "healthy"                                          ;;Set the initial state of the malaira to 'alive'
   ]
   colour-grid
@@ -39,7 +41,7 @@ to-report generate-genome                                        ;;Generate a ra
 end
 
 to go
-  ;;if count patches with [ state = "infected" ] = 0 [ stop ]       ;;Stop the button when the malaria has infected everyone
+  if count patches with [ state = "infected" ] = 0 [ stop ]       ;;Stop the button when the malaria has infected everyone
   malaria-spread
   treat
   ask patches
@@ -74,6 +76,7 @@ to infect
   ask one-of patches
   [ set pcolor red
     set state "infected"
+    set genome generate-genome
     show "has been infected.. Press 'F' to pay respects"
   ]
 end
@@ -86,6 +89,7 @@ to malaria-spread
         [ if state = "healthy" OR state = "treated"
           [ set state "infected"
             set pcolor red
+            set genome simple-swap-breed genome
           ]
         ]
       ]
@@ -94,15 +98,31 @@ to malaria-spread
 end
 
 to treat
+  ;;ask patches
+  ;;[ if state = "infected"
+  ;;  [ if random 100 < ( treatment-strength / 2 )
+  ;;    [ set state "treated"
+  ;;      set pcolor 94
+  ;;    ]
+  ;;  ]
+  ;;]
+
   ask patches
   [ if state = "infected"
-    [ if random 100 < ( treatment-strength / 2 )
+    [ let temp ( list )
+      set temp ( map = genome treatment )
+      if ( (length filter [ i -> i = true ] (temp) / length genome ) < ( treatment-strength / 100 ) )
       [ set state "treated"
         set pcolor 94
       ]
     ]
   ]
+
+
 end
+
+
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -310,7 +330,9 @@ true
 false
 "" ""
 PENS
-"Malaria Deaths" 1.0 0 -16777216 true "" "plot count patches with [ state = \"infected\" ]"
+"Malaria Infections" 1.0 0 -2674135 true "" "plot count patches with [ state = \"infected\" ]"
+"Healthy Humans" 1.0 0 -14439633 true "" "plot count patches with [ state = \"healthy\" ] "
+"Treated Humans" 1.0 0 -10649926 true "" "plot count patches with [ state = \"treated\" ] "
 
 SLIDER
 10
@@ -321,10 +343,10 @@ treatment-strength
 treatment-strength
 0
 100
-13.0
+100.0
 1
 1
-NIL
+%
 HORIZONTAL
 
 SWITCH
