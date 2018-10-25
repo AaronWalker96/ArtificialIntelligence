@@ -9,7 +9,7 @@ globals [
 
 ;About
 
-;logg.nls version 1
+;logg.nls version 3
 
 ;logg is a utility to make loging data out from netlogo to csv files easy
 ;In your model setup function, call "logg-setup"
@@ -26,7 +26,7 @@ end
 
 ;Call this procedure where you want to logg
 to logg-append [#tick #name #data]
-  output-print sentence #tick sentence #name #data
+  show (sentence #tick #name #data)
   !logg-fwrite #tick #name #data
 end
 
@@ -50,7 +50,7 @@ to-report !logg-isodate [#dateandtime]
   
   if ampm = "PM"[set sh-time-h (read-from-string sh-time-h + 12)]
   
-  report (word sh-date-y "-" sh-date-m "-" sh-date-d "T" sh-time-h ":" sh-time-m ":" sh-time-s "Z")
+  report (word sh-date-y "-" sh-date-m "-" sh-date-d "T" sh-time-h "-" sh-time-m "-" sh-time-s "Z")
 end
 
 

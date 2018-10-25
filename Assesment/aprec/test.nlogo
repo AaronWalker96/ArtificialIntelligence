@@ -14,7 +14,7 @@ goombas-own [wings]
 ;;;;;;;; UI TO LOGGER LINKS ;;;;;;;;
 
 to clear
-	logg-clr
+  clear-output
 end
 
 
@@ -158,13 +158,6 @@ GRAPHICS-WINDOW
 ticks
 30.0
 
-OUTPUT
-654
-10
-1075
-448
-11
-
 BUTTON
 9
 10
@@ -262,9 +255,9 @@ NIL
 HORIZONTAL
 
 PLOT
-1085
+657
 10
-1285
+857
 160
 Agent count
 Tick
@@ -282,9 +275,9 @@ PENS
 "Goomba" 1.0 0 -6459832 true "" "plot count goombas"
 
 MONITOR
-1087
+659
 176
-1174
+746
 221
 NIL
 count marios
@@ -293,9 +286,9 @@ count marios
 11
 
 MONITOR
-1089
+661
 231
-1189
+761
 276
 NIL
 count goombas
@@ -304,9 +297,9 @@ count goombas
 11
 
 MONITOR
-1091
+663
 287
-1277
+849
 332
 NIL
 count marios / count goombas
@@ -315,9 +308,9 @@ count marios / count goombas
 11
 
 MONITOR
-1093
+665
 344
-1150
+722
 389
 NIL
 \"Hello\"
