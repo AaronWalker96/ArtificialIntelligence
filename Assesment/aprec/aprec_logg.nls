@@ -3,7 +3,7 @@ extensions [csv]
 
 ;Define global variables
 globals [
-  files
+  logg-date
 ]
 
 
@@ -29,6 +29,7 @@ globals [
 ;Call in proj setup function to init logger
 to logg-setup
   logg-clr
+  set logg-date remove " " date-and-time
 end
 
 to logg-graph [#name #graph]
@@ -46,7 +47,7 @@ end
 ;Internal function - performs csv disk write
 to !logg-fwrite [#tick #name #data]
   let body fput #tick #data
-  file-open word #name ".csv"
+  file-open word #name word "_" word logg-date ".csv"
   file-print csv:to-row body
   file-close
 end
