@@ -1,7 +1,9 @@
 ; Updated 24.10.2018 by Ladislav, Q5127950@live.tees.ac.uk
 ;
-; TODO: treament, malaria spread, death caused by age
+; TODO: natural death cause adjustment - random age values in the set-up
 
+
+;  !!! Description outdated !!!
 ;  Patch/human state properties:
 ;  - Healthy   (green): Can be infected by surrounding
 ;                       infected individuals
@@ -24,7 +26,7 @@
 ; * GLOBALS *
 ; ***********
 patches-own [ state age infected_time revive_timer ]
-globals [ target_x  target_y  total_death_count  infection_death_count ]
+globals [ target_x  target_y  total_death_count  infection_death_count natural_death_count ]
 
 
 ; **************
@@ -37,7 +39,7 @@ to set-up
   reset-ticks
   ask patches
   [ spawn-human
-    set age 0
+    set age ( random max_human_life_length - 200 )
   ]
 end
 
@@ -51,8 +53,14 @@ to go
   ask patches
   [ set age age + 1
     ifelse age = max_human_life_length [ kill-human ]
-    [if age >= max_human_life_length - 40 [if random 16 > 14 [ kill-human ]]]       ; simulates natural death occurence
-                                                                                    ; current values randomly selected
+    [if age >= max_human_life_length - 40
+      [if random 16 > 14                         ; simulates natural death occurence
+        [ kill-human                             ; current values randomly selected
+          set natural_death_count natural_death_count + 1
+        ]
+      ]
+    ]
+
 
     if state = "dead"
     [ if revive_patches = true
@@ -64,12 +72,14 @@ to go
 
     if state = "infected"
     [ ifelse  infected_time < infection_fatality_time
-      [ set infected_time infected_time + 1 ; increment countdown value
+      [ set infected_time infected_time + 1      ; increment countdown value
 
           ; TODO: spread infection here
 
       ]
-      [ kill-human ]                        ; infection not treated for too long
+      [ kill-human                               ; infection not treated for too long
+        set infection_death_count  infection_death_count + 1
+      ]
     ]
 
   ]
@@ -125,43 +135,38 @@ end
 to apply-treatment                      ; applies treatment
   ask patches
   [ if state = "infected"
-    [ if random 100 < ( treatment_succes_rate / 2 )
-      [ set state "treated"
-        set infected_time 0
-        set pcolor 96
-        if pxcor mod 2 = 0 [ set pcolor 95 ]
-        if pycor mod 2 = 0 [ set pcolor 95 ]
-        if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 96]
-        show "treated"
-      ]
-    ]
+    [ if random 100 < ( treatment_succes_rate / 2 ) [ treat-human ]]
   ]
 end
 
 to treat-patch-at                     ; applies treatment on a single individual
   ask patch target_x target_y
-  [ set state "treated"
+  [ treat-human ]
+end
+
+to treat-human
+  set state "treated"
     set infected_time 0
     set pcolor 96
     if pxcor mod 2 = 0 [ set pcolor 95 ]
     if pycor mod 2 = 0 [ set pcolor 95 ]
     if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 96]
     show "treated"
-  ]
 end
 
 ; <<Human Procedures>>
 to spawn-human                            ; spawns a healthy individual
   set state "healthy"
   set pcolor 64
-      if pxcor mod 2 = 0 [ set pcolor 63 ]
-      if pycor mod 2 = 0 [ set pcolor 63 ]
-      if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 64 ]
+  if pxcor mod 2 = 0 [ set pcolor 63 ]
+  if pycor mod 2 = 0 [ set pcolor 63 ]
+  if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 64 ]
   set revive_timer stay_dead_time
   set infected_time 0
 end
 
 to kill-human                             ; human dies
+  set total_death_count total_death_count + 1
   set state "dead"
   set age 0
   set revive_timer stay_dead_time         ; reset timers
@@ -209,15 +214,15 @@ ticks
 30.0
 
 SLIDER
-711
-55
-967
-88
+21
+443
+277
+476
 infection_fatality_time
 infection_fatality_time
 50
-1000
-500.0
+500
+200.0
 1
 1
 ticks
@@ -225,14 +230,14 @@ HORIZONTAL
 
 SLIDER
 20
-317
-263
-350
+323
+256
+356
 treatment_succes_rate
 treatment_succes_rate
 0
 10
-5.0
+2.0
 1
 1
 NIL
@@ -240,14 +245,14 @@ HORIZONTAL
 
 SLIDER
 20
-360
-261
-393
+363
+256
+396
 infection_spread_rate
 infection_spread_rate
 0
 10
-5.0
+3.0
 1
 1
 NIL
@@ -267,11 +272,11 @@ fatality_scaling_on
 TEXTBOX
 714
 340
-892
-385
-Should the probability of death increase ovetime?\n(5% every tick)
+910
+400
+Should the probability of death increase ovetime?\n(5% every tick) *IN PROGRESS*
 12
-0.0
+15.0
 1
 
 BUTTON
@@ -390,7 +395,7 @@ stay_dead_time
 stay_dead_time
 1
 200
-150.0
+100.0
 1
 1
 ticks
@@ -467,15 +472,15 @@ remaining-age
 11
 
 SLIDER
-710
-15
-967
-48
+20
+403
+277
+436
 max_human_life_length
 max_human_life_length
-1000
-2000
-1200.0
+1200
+2500
+1800.0
 1
 1
 ticks
@@ -484,7 +489,7 @@ HORIZONTAL
 SWITCH
 21
 118
-203
+169
 151
 treat_infected
 treat_infected
@@ -508,6 +513,26 @@ NIL
 NIL
 NIL
 1
+
+PLOT
+21
+162
+255
+312
+Mortality rate
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"Total" 1.0 0 -16777216 true "" "plot total_death_count"
+"Infection" 1.0 0 -5298144 true "" "plot infection_death_count"
+"Natural" 1.0 0 -15637942 true "" "plot natural_death_count"
 
 @#$#@#$#@
 ## WHAT IS IT?
