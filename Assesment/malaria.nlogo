@@ -4,7 +4,7 @@
 __includes [ "breeding.nls" ]
 
 
-patches-own [ genome state ]                                     ;;Patches own a list of bits representing a binary genome and a state
+patches-own [ genome state time-alive ]                          ;;Patches own a list of bits representing a binary genome and a state
 globals [ mal-genome treatment-genome attribute-1 attribute-2 attribute-3 attribute-4 ]
 
 to setup
@@ -55,7 +55,11 @@ end
 
 to go                                                            ;;Start the kill/reproduce cycle of the malaria cells
   apply-treatment
+  ask patches
+  [ set time-alive ( time-alive + 1 ) ]
   tick
+  ask patches
+  [ if time-alive >= 100 [ set state "dead" ] ]
   colour-grid
   if ( count patches with [ state = "dead" ] = 0 ) [ stop ]      ;;Stop the 'go' button if the system has completed running
   replace-dead
@@ -98,6 +102,7 @@ to replace-dead                                                  ;;Replace the m
   ask patches
   [ if state = "dead" [ reproduce-mal ]                          ;;If the malaria dies, replace the dead cell by having an alive cell asexually reporoduce to keep a constant population
     set state "alive"                                            ;;Set the state of the new malaria to "alive"
+    set time-alive 0
   ]
 end
 
