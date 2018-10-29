@@ -5,7 +5,7 @@ __includes [ "breeding.nls" "logg.nls" ]
 
 
 patches-own [ genome state time-alive ]                          ;;Patches own a list of bits representing a binary genome and a state
-globals [ mal-genome treatment-genome attribute-1 attribute-2 attribute-3 attribute-4 ]
+globals [ mal-genome treatment-genome attribute-1 attribute-2 attribute-3 attribute-4 treatment-timer ]
 
 to setup
   clear-all                                                      ;;Reset the model
@@ -43,11 +43,12 @@ to-report generate-genome                                        ;;Generate a ra
 end
 
 to mouse-update
-  ask patch mouse-xcor mouse-ycor [ set mal-genome genome ]      ;;Update "selected genome" monitor
-  ask patch mouse-xcor mouse-ycor [ set attribute-1 sublist genome 0 8 ]      ;;Update "attribute-1" monitor
-  ask patch mouse-xcor mouse-ycor [ set attribute-2 sublist genome 8 16 ]      ;;Update "attribute-2" monitor
-  ask patch mouse-xcor mouse-ycor [ set attribute-3 sublist genome 16 24 ]      ;;Update "attribute-3" monitor
-  ask patch mouse-xcor mouse-ycor [ set attribute-4 sublist genome 24 32 ]      ;;Update "attribute-4" monitor
+  ask patch mouse-xcor mouse-ycor
+  [ set mal-genome genome      ;;Update "selected genome" monitor
+    set attribute-1 sublist genome 0 8       ;;Update "attribute-1" monitor
+    set attribute-2 sublist genome 8 16       ;;Update "attribute-2" monitor
+    set attribute-3 sublist genome 16 24       ;;Update "attribute-3" monitor
+    set attribute-4 sublist genome 24 32 ]      ;;Update "attribute-4" monitor
 
   if mouse-down?
   [ ask patch mouse-xcor mouse-ycor [ reproduce-mal ]            ;;Kill malaria patch when clicked and generate a new genome
@@ -55,8 +56,11 @@ to mouse-update
 end
 
 to go
-  if ticks = introduce-treatment [new-treatment show "New Treatment has been added..."]
-  ;;Start the kill/reproduce cycle of the malaria cells
+  if treatment-timer = introduce-treatment
+  [ new-treatment show "New Treatment has been added..."
+    set treatment-timer 0
+  ]
+  ;;Stat the kill/reproduce cycle of the malaria cells
   apply-treatment
   ask patches
   [ set time-alive ( time-alive + 1 ) ]
@@ -67,6 +71,7 @@ to go
   colour-grid
   if ( count patches with [ state = "dead" ] = 0 ) [ stop ]      ;;Stop the 'go' button if the system has completed running
   replace-dead
+  set treatment-timer ( treatment-timer + 1 )
 end
 
 to-report get-neighbor-genome                                    ;;Get the genome of a random neighbor malaria parasite
@@ -113,7 +118,7 @@ to replace-dead                                                  ;;Replace the m
 end
 
 to new-treatment                                                 ;;Introduce a new treatment to the system
-  set treatment-genome generate-genome                           ;;Generate a random genome for the starting treatment
+  set treatment-genome simple-swap-breed generate-genome                           ;;Generate a random genome for the starting treatment
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
