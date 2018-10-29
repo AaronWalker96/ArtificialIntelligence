@@ -1,14 +1,15 @@
 ;;Solution for modeling Malaria mutations and treatment in NetLogo
 ;;Last updated 21/10/2018 by Aaron Walker - Q5045715
 
-__includes [ "breeding.nls" ]
+__includes [ "breeding.nls" "logg.nls" ]
 
 
-patches-own [ genome state ]                                     ;;Patches own a list of bits representing a binary genome and a state
+patches-own [ genome state time-alive ]                          ;;Patches own a list of bits representing a binary genome and a state
 globals [ mal-genome treatment-genome attribute-1 attribute-2 attribute-3 attribute-4 ]
 
 to setup
   clear-all                                                      ;;Reset the model
+  logg-setup
   reset-ticks                                                    ;;Reset ticks
   setup-patches                                                  ;;Perform setup for patches
   set treatment-genome generate-genome                           ;;Generate a random genome for the starting treatment
@@ -49,13 +50,19 @@ to mouse-update
   ask patch mouse-xcor mouse-ycor [ set attribute-4 sublist genome 24 32 ]      ;;Update "attribute-4" monitor
 
   if mouse-down?
-  [ ask patch mouse-xcor mouse-ycor [ reproduce-mal ]            ;;Kill malaria patch when clicked and generate a new genome
-  ]
+  [ ask patch mouse-xcor mouse-ycor [ reproduce-mal ] ]           ;;Kill malaria patch when clicked and generate a new genome
 end
 
-to go                                                            ;;Start the kill/reproduce cycle of the malaria cells
+to go
+  if ticks = introduce-treatment [new-treatment show "New Treatment has been added..."]
+  ;;Start the kill/reproduce cycle of the malaria cells
   apply-treatment
+  ask patches
+  [ set time-alive ( time-alive + 1 ) ]
+  logg-append ticks "mal"  (list (count patches with [ state = "dead" ]) (count patches with [ state = "alive" ]))
   tick
+  ask patches
+  [ if time-alive >= 100 [ set state "dead" ] ]
   colour-grid
   if ( count patches with [ state = "dead" ] = 0 ) [ stop ]      ;;Stop the 'go' button if the system has completed running
   replace-dead
@@ -73,7 +80,8 @@ to reproduce-mal                                                 ;;Get a random 
   [ set res get-neighbor-genome ]                                ;;Perform mutation on neighbor genome (kill and reproduce)
   [ set res genome ]                                             ;;Else perform mutation on own genome (mutate)
 
-  set genome simple-swap-breed genome
+  ifelse simple-swap? [set genome simple-swap-breed genome][set genome change-random-bit-n-times genome 1 + random(32 - 1) ]
+
 
   ;;set genome map                                                 ;;Set current genome to results of...
   ;;[ gen -> ifelse-value (random-float 100.0 < mutation)          ;;If random number is less than mutation value (of each bit in genome)
@@ -89,6 +97,7 @@ to apply-treatment                                               ;;Apply the tre
     if (( length filter [ i -> i = true ] (comparitor) / length comparitor ) * 100 )  < treatment-effectiveness  ;;If the difference is > than the treatment effectiveness slider, kill the malaria (set colour to red)
     [ set pcolor red
       set state "dead"
+
     ]
   ]
 end
@@ -98,6 +107,7 @@ to replace-dead                                                  ;;Replace the m
   ask patches
   [ if state = "dead" [ reproduce-mal ]                          ;;If the malaria dies, replace the dead cell by having an alive cell asexually reporoduce to keep a constant population
     set state "alive"                                            ;;Set the state of the new malaria to "alive"
+    set time-alive 0
   ]
 end
 
@@ -381,6 +391,17 @@ introduce-treatment
 1
 NIL
 HORIZONTAL
+
+SWITCH
+218
+506
+346
+539
+simple-swap?
+simple-swap?
+0
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?

@@ -1,6 +1,5 @@
-; Updated 24.10.2018 by Ladislav, Q5127950@live.tees.ac.uk
-;
-; TODO: natural death cause adjustment - random age values in the set-up
+; Updated 28.10.2018 by Ladislav, Q5127950@live.tees.ac.uk
+; Introduced assexual breeding to infetion spreading, added logging
 
 
 ;  !!! Description outdated !!!
@@ -22,45 +21,49 @@
 ;                       certain time a healthy individual
 ;                       takes its place. Cannot get infected.
 
+__includes [ "breeding.nls" "logg.nls" ]
+
 ; ***********
 ; * GLOBALS *
 ; ***********
-patches-own [ state age infected_time revive_timer ]
-globals [ target_x  target_y  total_death_count  infection_death_count natural_death_count ]
+patches-own [ state age genome infected_time revive_timer ]
+globals
+[ target_x
+  target_y
+  total_death_count
+  infection_death_count
+  natural_death_count
+  treatment_genome
+]
 
 
 ; **************
 ; * PROCEDURES *
 ; **************
-
 ; <<General Procedures>>
 to set-up
   clear-all
   reset-ticks
   ask patches
   [ spawn-human
-    set age ( random max_human_life_length - 200 )
+    set age ( random max_human_life_length - 350 )
   ]
 end
 
-to setup-globals
-  set target_x 0
-  set target_y 0
-end
-
-
 to go
+  if (ticks mod new_treatment_introduction_rate) = 0
+  [ set treatment_genome generate-genome ]       ; Introduce new tretment among the population
+
   ask patches
   [ set age age + 1
     ifelse age = max_human_life_length [ kill-human ]
-    [if age >= max_human_life_length - 40
-      [if random 16 > 14                         ; simulates natural death occurence
-        [ kill-human                             ; current values randomly selected
+    [if age >= max_human_life_length - 40        ; Simulates natural death occurence
+      [if random 16 > 14                         ; Current values randomly selected
+        [ kill-human
           set natural_death_count natural_death_count + 1
         ]
       ]
     ]
-
 
     if state = "dead"
     [ if revive_patches = true
@@ -72,58 +75,37 @@ to go
 
     if state = "infected"
     [ ifelse  infected_time < infection_fatality_time
-      [ set infected_time infected_time + 1      ; increment countdown value
-
-          ; TODO: spread infection here
-
-      ]
-      [ kill-human                               ; infection not treated for too long
+      [ set infected_time infected_time + 1 ]    ; Increment infected time countdown value
+      [ kill-human                               ; Infection not treated for too long it became fatal
         set infection_death_count  infection_death_count + 1
       ]
     ]
 
   ]
+
   spread-infection
   if treat_infected = true [ apply-treatment ]
   tick
 end
 
 ; <<Infection Procedures>>
-to infect-random                            ; infects a random human patch
-  ask one-of patches
-  [ set state "infected"
-    set pcolor 15
-    if pxcor mod 2 = 0 [ set pcolor 14 ]
-    if pycor mod 2 = 0 [ set pcolor 14 ]
-    if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 15 ]
-    show "infected"
-  ]
-end
-
-to infect-patch-at                           ; infects specified human patch
-  ask patch target_x target_y
-  [ set state "infected"
-    set pcolor 15
-    if pxcor mod 2 = 0 [ set pcolor 14 ]
-    if pycor mod 2 = 0 [ set pcolor 14 ]
-    if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 15]
-    show "infected"
-  ]
-end
-
 to spread-infection
   ask patches
   [ if state = "infected"
     [ if random 101 < infection_spread_rate
       [ ask one-of neighbors
-        [
-          if state = "healthy" OR state = "treated"
-          [ set state "infected"
-            set pcolor 15
-            if pxcor mod 2 = 0 [ set pcolor 14 ]
-            if pycor mod 2 = 0 [ set pcolor 14 ]
-            if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 15]
-            show "infected"
+        [ let legacy_gen genome
+          if random 101 < mutation_chance      ; Infection genome has a chance to mutate
+          [ set legacy_gen change-random-bit-n-times genome 1 + random (genome_length - 1) ]
+
+          ifelse state = "healthy"             ; Spread infection on a healthy idividual
+          [ infect-human legacy_gen ]
+          [ if state = "treated"               ; If
+            [ let comparitor (list)                                          ;;Declare new empty list
+              set comparitor (map = genome treatment_genome)               ;;Compare each bit of the malaria genome to the treatment and put the true/false result in the new list
+              if (( length filter [ i -> i = true ] (comparitor) / length comparitor ) * 100 )  < treatment_succes_rate  ;;If the difference is > than the treatment effectiveness slider, kill the malaria (set colour to red)
+              [ infect-human legacy_gen ]
+            ]
           ]
         ]
       ]
@@ -131,22 +113,40 @@ to spread-infection
   ]
 end
 
+to infect-random                                ; Infect a random human patch
+  ask one-of patches [ infect-human generate-genome ]
+end
+
+to infect-patchxy [x y]                         ; Infect specified human patch
+  ask patch x y [ infect-human generate-genome ]
+end
+
+to infect-human [ gen ]                         ; Infects human with specified genome
+  set state "infected"
+  set pcolor 15
+  set genome gen
+  if pxcor mod 2 = 0 [ set pcolor 14 ]
+  if pycor mod 2 = 0 [ set pcolor 14 ]
+  if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 15]
+  show "infected"
+end
+
 ; <<Treatment Procedures>>
-to apply-treatment                      ; applies treatment
+to apply-treatment                              ; Apply treatment
   ask patches
   [ if state = "infected"
-    [ if random 100 < ( treatment_succes_rate / 2 ) [ treat-human ]]
+    [ let comparitor (list)                                          ;;Declare new empty list
+        set comparitor (map = genome treatment_genome)               ;;Compare each bit of the malaria genome to the treatment and put the true/false result in the new list
+        if (( length filter [ i -> i = true ] (comparitor) / length comparitor ) * 100 )  < treatment_succes_rate  ;;If the difference is > than the treatment effectiveness slider, kill the malaria (set colour to red)
+        [ treat-human  ]
+    ]
   ]
 end
 
-to treat-patch-at                     ; applies treatment on a single individual
-  ask patch target_x target_y
-  [ treat-human ]
-end
-
-to treat-human
+to treat-human                                  ; Treat specified human patch
   set state "treated"
     set infected_time 0
+    set genome treatment_genome
     set pcolor 96
     if pxcor mod 2 = 0 [ set pcolor 95 ]
     if pycor mod 2 = 0 [ set pcolor 95 ]
@@ -155,42 +155,58 @@ to treat-human
 end
 
 ; <<Human Procedures>>
-to spawn-human                            ; spawns a healthy individual
+to spawn-human                                  ; Spawn a healthy individual
   set state "healthy"
   set pcolor 64
   if pxcor mod 2 = 0 [ set pcolor 63 ]
   if pycor mod 2 = 0 [ set pcolor 63 ]
   if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 64 ]
-  set revive_timer stay_dead_time
+  set revive_timer respawn_delay
   set infected_time 0
 end
 
-to kill-human                             ; human dies
+to kill-human                                   ; Modifies patch to "dead" state
   set total_death_count total_death_count + 1
   set state "dead"
   set age 0
-  set revive_timer stay_dead_time         ; reset timers
+  set revive_timer respawn_delay         ; reset timers
   set pcolor 1
 end
 
 
-; ***********
-; * REPORTS *
-; ***********
+; *************
+; * REPORTERS *
+; *************
 
-to-report report-state
-  report [state] of patch target_x target_y
+to-report report-state-from [y x]
+  report [state] of patch x y
 end
 
-to-report remaining-age
-  report [age] of patch target_x target_y
+to-report report-age-from [y x]
+  report [age] of patch x y
+end
+
+to-report report-genome-from [y x]
+  report [genome] of patch x y
+end
+
+to-report report-treatment-genome
+  report treatment_genome
+end
+
+to-report generate-genome                       ; Generate a random binary genome that is as long as specified by the genome_count global
+  let new-genome (list)                         ; Make a new list to store the genome bits
+  loop
+  [ if length new-genome = genome_length [ report new-genome ]
+    set new-genome lput random 2 new-genome
+  ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-287
+279
 14
-698
-426
+820
+556
 -1
 -1
 13.0
@@ -203,10 +219,10 @@ GRAPHICS-WINDOW
 0
 0
 1
--15
-15
--15
-15
+-20
+20
+-20
+20
 0
 0
 1
@@ -214,55 +230,55 @@ ticks
 30.0
 
 SLIDER
-21
-443
-277
-476
+22
+328
+259
+361
 infection_fatality_time
 infection_fatality_time
 50
 500
-200.0
+170.0
 1
 1
 ticks
 HORIZONTAL
 
 SLIDER
-20
-323
-256
-356
+22
+165
+258
+198
 treatment_succes_rate
 treatment_succes_rate
-0
-10
-2.0
+1
+100
+11.0
 1
 1
-NIL
+%
 HORIZONTAL
 
 SLIDER
-20
-363
-256
-396
+22
+206
+258
+239
 infection_spread_rate
 infection_spread_rate
 0
 10
-3.0
+8.0
 1
 1
 NIL
 HORIZONTAL
 
 SWITCH
-713
-388
-920
-421
+870
+499
+1077
+532
 fatality_scaling_on
 fatality_scaling_on
 1
@@ -270,20 +286,20 @@ fatality_scaling_on
 -1000
 
 TEXTBOX
-714
-340
-910
-400
+871
+451
+1067
+511
 Should the probability of death increase ovetime?\n(5% every tick) *IN PROGRESS*
 12
 15.0
 1
 
 BUTTON
-21
-77
-260
-110
+22
+69
+261
+102
 Infect
 infect-random
 NIL
@@ -297,10 +313,10 @@ NIL
 1
 
 BUTTON
-21
-16
-104
-49
+22
+15
+105
+48
 Set-up
 set-up
 NIL
@@ -314,10 +330,10 @@ NIL
 1
 
 BUTTON
-114
-16
-181
-49
+115
+15
+182
+48
 Start
 go
 T
@@ -331,10 +347,10 @@ NIL
 0
 
 BUTTON
-191
-16
-260
-49
+192
+15
+261
+48
 Once
 go
 NIL
@@ -348,10 +364,10 @@ NIL
 0
 
 MONITOR
-479
-437
-539
-482
+344
+565
+404
+610
 Target Y
 target_y
 17
@@ -359,10 +375,10 @@ target_y
 11
 
 MONITOR
-415
-437
-475
-482
+280
+565
+340
+610
 Target X
 target_x
 17
@@ -370,11 +386,11 @@ target_x
 11
 
 BUTTON
-298
-437
-411
-482
-Mouse coords
+410
+577
+512
+610
+Obtain target
 if mouse-down?\n[ set target_x (round mouse-xcor )\n  set target_y (round mouse-ycor )\n ]
 T
 1
@@ -387,37 +403,37 @@ NIL
 1
 
 SLIDER
-711
-266
-917
-299
-stay_dead_time
-stay_dead_time
-1
+24
+445
+260
+478
+respawn_delay
+respawn_delay
+0
 200
-100.0
+0.0
 1
 1
 ticks
 HORIZONTAL
 
 TEXTBOX
-715
-233
-883
-263
-Time left before a new healthy human re-spawns
+28
+413
+253
+443
+Time delay before a new human re-spawns in place of a dead one
 12
 0.0
 0
 
 BUTTON
-452
-487
-561
-520
-Infect Patch
-infect-patch-at
+604
+577
+689
+610
+Infect target
+ask patch target_x target_y \n[ infect-human generate-genome]
 NIL
 1
 T
@@ -429,21 +445,21 @@ NIL
 1
 
 MONITOR
-604
-437
-683
-482
+1009
+15
+1088
+60
 Sate
-report-state
+report-state-from mouse-xcor mouse-ycor
 17
 1
 11
 
 SWITCH
-709
-187
-918
-220
+24
+560
+261
+593
 revive_patches
 revive_patches
 0
@@ -451,46 +467,46 @@ revive_patches
 -1000
 
 TEXTBOX
-711
-153
-910
-198
+26
+528
+256
+573
 Should the dead patches be replaced with new humans?
 12
 0.0
 1
 
 MONITOR
-543
-437
-600
-482
+947
+15
+1004
+60
 Age
-remaining-age
+report-age-from mouse-xcor mouse-ycor
 17
 1
 11
 
 SLIDER
-20
-403
-277
-436
+22
+287
+259
+320
 max_human_life_length
 max_human_life_length
 1200
-2500
-1800.0
+2400
+1700.0
 1
 1
 ticks
 HORIZONTAL
 
 SWITCH
-21
-118
-169
-151
+24
+486
+260
+519
 treat_infected
 treat_infected
 1
@@ -498,12 +514,12 @@ treat_infected
 -1000
 
 BUTTON
-567
-487
-683
-520
-Treat Patch
-treat-patch-at
+517
+577
+600
+610
+Treat target
+ask patch target_x target_y [ treat-human ]
 NIL
 1
 T
@@ -515,10 +531,10 @@ NIL
 1
 
 PLOT
-21
-162
-255
-312
+846
+217
+1131
+407
 Mortality rate
 NIL
 NIL
@@ -533,6 +549,95 @@ PENS
 "Total" 1.0 0 -16777216 true "" "plot total_death_count"
 "Infection" 1.0 0 -5298144 true "" "plot infection_death_count"
 "Natural" 1.0 0 -15637942 true "" "plot natural_death_count"
+
+MONITOR
+836
+15
+886
+60
+ X
+round mouse-xcor
+17
+1
+11
+
+MONITOR
+891
+15
+941
+60
+ Y
+round mouse-ycor
+17
+1
+11
+
+MONITOR
+836
+67
+1293
+112
+Infection Genome
+report-genome-from mouse-xcor mouse-ycor
+17
+1
+11
+
+MONITOR
+838
+119
+1294
+164
+Current Anti-genome treatment
+report-treatment-genome
+17
+1
+11
+
+SLIDER
+22
+370
+260
+403
+genome_length
+genome_length
+8
+32
+32.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+22
+125
+258
+158
+new_treatment_introduction_rate
+new_treatment_introduction_rate
+1
+1000
+700.0
+1
+1
+ticks
+HORIZONTAL
+
+SLIDER
+22
+246
+259
+279
+mutation_chance
+mutation_chance
+0
+100
+4.6
+0.1
+1
+%
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
