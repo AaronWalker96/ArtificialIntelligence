@@ -4,121 +4,117 @@
 __includes [ "breeding.nls" "logg.nls" ]
 
 
-patches-own [ genome state time-alive ]                          ;;Patches own a list of bits representing a binary genome and a state
-globals [ mal-genome treatment-genome attribute-1 attribute-2 attribute-3 attribute-4 treatment-timer ]
+patches-own [ genome state ]  ;;Patches own a list of bits representing a binary genome and a state
+globals [ mal-genome treatment-genome attribute-1 attribute-2 attribute-3 attribute-4 treatment-timer genome-length ]
 
+;;Set up the model and prepare th environment
 to setup
-  clear-all                                                      ;;Reset the model
+  ;;Housekeeping
+  clear-all
   logg-setup
-  reset-ticks                                                    ;;Reset ticks
-  setup-patches                                                  ;;Perform setup for patches
-  set treatment-genome generate-genome                           ;;Generate a random genome for the starting treatment
+  reset-ticks
+
+  ;;Define
+  set genome-length 32
+
+  ;;Setup world state
+  setup-patches
+  set treatment-genome generate-genome
 end
 
-to setup-patches                                                 ;;Colour patches in a grid formation so they are easier to see, generate a random genome for each patch
+;;Set starting state and genome for patches and colour patches in a grid formation
+to setup-patches
   ask patches
-  [ set genome generate-genome                                   ;;Generate a random genome
-    set state "alive"                                            ;;Set the initial state of the malaira to 'alive'
+  [ set genome generate-genome
+    set state "junior"
   ]
   colour-grid
 end
 
-to colour-grid                                                   ;;Set the colours of the grid so that it's easy to see individual patches
+;;Set the colours of the grid so that it's easy to see individual patches
+to colour-grid
   ask patches
-  [ if state = "alive"
+  [ if state = "senior"
     [ set pcolor 2
       if pxcor mod 2 = 0 [ set pcolor 3 ]
       if pycor mod 2 = 0 [ set pcolor 4 ]
-      if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 2 ]
-    ]
+      if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 2 ] ]
+    if state = "junior"
+    [ set pcolor 94
+      if pxcor mod 2 = 0 [ set pcolor 95 ]
+      if pycor mod 2 = 0 [ set pcolor 96 ]
+      if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 94 ] ]
+    if state = "dead"
+    [ set pcolor 15
+      if pxcor mod 2 = 0 [ set pcolor 16 ]
+      if pycor mod 2 = 0 [ set pcolor 17 ]
+      if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 15 ] ]
   ]
 end
 
-to-report generate-genome                                        ;;Generate a random binary genome that is as long as specified by the genome-count global
-  let new-genome (list)                                          ;;Make a new list to store the genome bits
+;;Generate a random binary genome that is as long as specified by the genome-count global
+to-report generate-genome
+  let new-genome (list)
   loop
   [ if length new-genome = genome-length [ report new-genome ]
     set new-genome lput random 2 new-genome
   ]
 end
 
+;;Update the monitor for mouse over genome selection (For diag benefit only)
 to mouse-update
   ask patch mouse-xcor mouse-ycor
-  [ set mal-genome genome      ;;Update "selected genome" monitor
-    set attribute-1 sublist genome 0 8       ;;Update "attribute-1" monitor
-    set attribute-2 sublist genome 8 16       ;;Update "attribute-2" monitor
-    set attribute-3 sublist genome 16 24       ;;Update "attribute-3" monitor
-    set attribute-4 sublist genome 24 32 ]      ;;Update "attribute-4" monitor
-
-  if mouse-down?
-  [ ask patch mouse-xcor mouse-ycor [ reproduce-mal ]            ;;Kill malaria patch when clicked and generate a new genome
-  ]
+  [ set mal-genome genome
+    set attribute-1 sublist genome 0 8  ;;Update "attribute-1" monitor***
+    set attribute-2 sublist genome 8 16  ;;Update "attribute-2" monitor***
+    set attribute-3 sublist genome 16 24  ;;Update "attribute-3" monitor***
+    set attribute-4 sublist genome 24 32 ] ;;Update "attribute-4" monitor***
 end
 
 to go
-  if treatment-timer = introduce-treatment
-  [ new-treatment show "New Treatment has been added..."
-    set treatment-timer 0
-  ]
-  ;;Stat the kill/reproduce cycle of the malaria cells
-  apply-treatment
-  ask patches
-  [ set time-alive ( time-alive + 1 ) ]
-  logg-append ticks "mal"  (list (count patches with [ state = "dead" ]) (count patches with [ state = "alive" ]))
   tick
-  ask patches
-  [ if time-alive >= 100 [ set state "dead" ] ]
+
+  ;;Age the junior patches
+  ask patches with [ state = "junior" ]
+  [ set state "senior" ]
+
+  ;;Apply anti-malarial
+  apply-treatment
+
+  ;;Stop the 'go' loop if the system has reached goal state
+  if ( count patches with [ state = "dead" ] = 0 ) [ stop ]
+
+  ;;Log the amount of alive and dead malaria cells
+  logg-append ticks "mal"  (list (count patches with [ state = "dead" ]) (count patches with [ state = "junior" OR state = "senior" ]))
+
+  ;;Allow the alive malaria to reproduce
+  mal-reproduce
+
   colour-grid
-  if ( count patches with [ state = "dead" ] = 0 ) [ stop ]      ;;Stop the 'go' button if the system has completed running
-  replace-dead
-  set treatment-timer ( treatment-timer + 1 )
 end
 
-to-report get-neighbor-genome                                    ;;Get the genome of a random neighbor malaria parasite
-  let neighbor-genome ""
-  ask one-of neighbors [ set neighbor-genome genome ]
-  report neighbor-genome
+;;Apply the treatment to the alive malaria and kill any that don't survive
+to apply-treatment
+  let comparitor (list)
+  ;;Compare each bit of the malaria genome to the treatment and put the true/false result in the new list
+  ;;If the difference is > than the treatment effectiveness slider, kill the malaria
+  ask patches with [ state = "junior" OR state = "senior" ]
+  [ set comparitor (map = genome treatment-genome)
+    if (( length filter [ i -> i = true ] (comparitor) / length comparitor ) * 100 )  < treatment-effectiveness
+    [ set state "dead" ]
+  ]
 end
 
-to reproduce-mal                                                 ;;Get a random neighbor malaria to asexually reproduce with a chance of mutation
-  let res ""                                                     ;;Declare empty string
-  ifelse kill                                                    ;;If kill switch active
-  [ set res get-neighbor-genome ]                                ;;Perform mutation on neighbor genome (kill and reproduce)
-  [ set res genome ]                                             ;;Else perform mutation on own genome (mutate)
-
-  ifelse simple-swap? [set genome simple-swap-breed genome][set genome change-random-bit-n-times genome 1 + random(32 - 1) ]
-
-
-  ;;set genome map                                                 ;;Set current genome to results of...
-  ;;[ gen -> ifelse-value (random-float 100.0 < mutation)          ;;If random number is less than mutation value (of each bit in genome)
-  ;;  [ 1 - gen ]                                                  ;;Value if true
-  ;;  [ gen ]                                                      ;;Value if false
-  ;;] res                                                          ;;Run map on random neighbor(8) genome or current genome (Dependant on kill switch)
-end
-
-to apply-treatment                                               ;;Apply the treatment to the existing malaria and kill any that don't survive (set colour to red)
-  let comparitor (list)                                          ;;Declare new empty list
+;;Replace the malaria cells that have been killed off by the treatment
+to mal-reproduce
   ask patches
-  [ set comparitor (map = genome treatment-genome)               ;;Compare each bit of the malaria genome to the treatment and put the true/false result in the new list
-    if (( length filter [ i -> i = true ] (comparitor) / length comparitor ) * 100 )  < treatment-effectiveness  ;;If the difference is > than the treatment effectiveness slider, kill the malaria (set colour to red)
-    [ set pcolor red
-      set state "dead"
-
+  [ if state = "senior" AND (count neighbors with [ state = "dead" ]) > 0
+    [ let parent-genome genome
+      ask one-of neighbors with [ state = "dead" ]
+      [ set genome simple-swap-breed parent-genome
+        set state "junior" ]
     ]
   ]
-end
-
-to replace-dead                                                  ;;Replace the malaria cells that have been killed off by the treatment
-  colour-grid
-  ask patches
-  [ if state = "dead" [ reproduce-mal ]                          ;;If the malaria dies, replace the dead cell by having an alive cell asexually reporoduce to keep a constant population
-    set state "alive"                                            ;;Set the state of the new malaria to "alive"
-    set time-alive 0
-  ]
-end
-
-to new-treatment                                                 ;;Introduce a new treatment to the system
-  set treatment-genome simple-swap-breed generate-genome                           ;;Generate a random genome for the starting treatment
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -195,24 +191,9 @@ mal-genome
 
 SLIDER
 18
-56
-190
-89
-genome-length
-genome-length
-0
-32
-32.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-18
-102
+61
 191
-135
+94
 mutation
 mutation
 0
@@ -240,27 +221,6 @@ NIL
 NIL
 1
 
-SWITCH
-18
-292
-192
-325
-kill
-kill
-0
-1
--1000
-
-TEXTBOX
-19
-335
-169
-531
-If \"kill\" switch is set to \"off\", the malaria will mutate when clicked.\n\nIf the \"kill\" switch is set to \"on\" the malaria will be killed when clicked and a random neighbor (8) will asexually reproduce to replace it. During this process there may be a mutation that you can adjust with the \"mutation\" slider
-11
-0.0
-1
-
 MONITOR
 692
 75
@@ -272,43 +232,26 @@ treatment-genome
 1
 11
 
-BUTTON
-692
-140
-879
-173
-Introduce New Treatment
-new-treatment
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
 SLIDER
 18
-149
+108
 191
-182
+141
 treatment-effectiveness
 treatment-effectiveness
 0
 100
-68.0
+75.0
 1
 1
 NIL
 HORIZONTAL
 
 PLOT
-696
-242
-896
-392
+693
+274
+1040
+424
 Treatment Effectiveness
 Time
 Dead Malaria
@@ -320,13 +263,15 @@ true
 false
 "" ""
 PENS
-"Malaria Deaths" 1.0 0 -16777216 true "" "plot count patches with [ state = \"alive\" ]"
+"Junior Cells" 1.0 0 -13791810 true "" "plot count patches with [ state = \"junior\" ]"
+"Senior Cells " 1.0 0 -7500403 true "" "plot count patches with [ state = \"senior\" ] "
+"Dead Cells" 1.0 0 -2674135 true "" "plot count patches with [ state = \"dead\" ] "
 
 MONITOR
-1085
-10
-1191
-55
+751
+139
+857
+184
 Attribute 1
 attribute-1
 17
@@ -334,10 +279,10 @@ attribute-1
 11
 
 MONITOR
-1206
-10
-1312
-55
+872
+139
+978
+184
 Attribute 2
 attribute-2
 17
@@ -345,10 +290,10 @@ attribute-2
 11
 
 MONITOR
-1085
-76
-1191
-121
+751
+205
+857
+250
 Attribute 3
 attribute-3
 17
@@ -356,10 +301,10 @@ attribute-3
 11
 
 MONITOR
-1207
-76
-1313
-121
+873
+205
+979
+250
 Attribute 4
 attribute-4
 17
@@ -368,9 +313,9 @@ attribute-4
 
 BUTTON
 18
-245
+157
 192
-278
+190
 Mouse update
 mouse-update
 T
@@ -382,32 +327,6 @@ NIL
 NIL
 NIL
 1
-
-SLIDER
-18
-196
-192
-229
-introduce-treatment
-introduce-treatment
-0
-1000
-200.0
-1
-1
-NIL
-HORIZONTAL
-
-SWITCH
-218
-506
-346
-539
-simple-swap?
-simple-swap?
-0
-1
--1000
 
 @#$#@#$#@
 ## WHAT IS IT?
