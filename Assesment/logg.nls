@@ -6,7 +6,6 @@ globals [
   logg-date
 ]
 
-
 ;About
 
 ;logg.nls version 3
@@ -27,7 +26,6 @@ end
 
 ;Call this procedure where you want to logg
 to logg-append [#tick #name #data]
-  show (sentence #tick #name #data)
   !logg-fwrite #tick #name #data
 end
 

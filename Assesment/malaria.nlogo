@@ -74,6 +74,13 @@ end
 to go
   tick
 
+  ;;Automatic treatment
+  if treatment-timer = introduce-treatment
+  [ new-treatment
+    show "New Treatment has been added..."
+    set treatment-timer 0
+  ]
+
   ;;Age the junior patches
   ask patches with [ state = "junior" ]
   [ set state "senior" ]
@@ -81,8 +88,10 @@ to go
   ;;Apply anti-malarial
   apply-treatment
 
+  colour-grid
+
   ;;Stop the 'go' loop if the system has reached goal state
-  if ( count patches with [ state = "dead" ] = 0 ) [ stop ]
+  if (( count patches with [ state = "dead"] = 0 ) AND ( count patches with [ state = "junior" ] = 0 )) OR ( count patches with [ state = "dead"] = count patches ) [ stop ]
 
   ;;Log the amount of alive and dead malaria cells
   logg-append ticks "mal"  (list (count patches with [ state = "dead" ]) (count patches with [ state = "junior" OR state = "senior" ]))
@@ -91,6 +100,8 @@ to go
   mal-reproduce
 
   colour-grid
+
+  set treatment-timer treatment-timer + 1
 end
 
 ;;Apply the treatment to the alive malaria and kill any that don't survive
@@ -107,14 +118,20 @@ end
 
 ;;Replace the malaria cells that have been killed off by the treatment
 to mal-reproduce
-  ask patches
-  [ if state = "senior" AND (count neighbors with [ state = "dead" ]) > 0
-    [ let parent-genome genome
-      ask one-of neighbors with [ state = "dead" ]
-      [ set genome simple-swap-breed parent-genome
-        set state "junior" ]
+  if ( (random 100) * 2 > treatment-effectiveness)
+  [ ask patches
+    [ if state = "senior" AND (count neighbors with [ state = "dead" ]) > 0
+      [ let parent-genome genome
+        ask one-of neighbors with [ state = "dead" ]
+        [ set genome simple-swap-breed parent-genome
+          set state "junior" ]
+      ]
     ]
   ]
+end
+
+to new-treatment
+  set treatment-genome change-random-bit-n-times treatment-genome 8
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -198,7 +215,7 @@ mutation
 mutation
 0
 32
-8.0
+28.0
 1
 1
 NIL
@@ -241,7 +258,7 @@ treatment-effectiveness
 treatment-effectiveness
 0
 100
-75.0
+72.0
 1
 1
 NIL
@@ -313,9 +330,9 @@ attribute-4
 
 BUTTON
 18
-157
+201
 192
-190
+234
 Mouse update
 mouse-update
 T
@@ -327,6 +344,21 @@ NIL
 NIL
 NIL
 1
+
+SLIDER
+18
+154
+192
+187
+introduce-treatment
+introduce-treatment
+0
+500
+20.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
