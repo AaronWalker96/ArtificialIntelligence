@@ -82,7 +82,6 @@ to go
   ;;Apply anti-malarial
  ;; apply-treatment
   apply-treatment
-
   ;;Stop the 'go' loop if the system has reached goal state
   if ( count patches with [ state = "dead" ] = 0 )
   [
@@ -90,7 +89,7 @@ to go
     [
       if(drug-mutation-active?)
       [
-        set treatment-genome change-random-bit-n-times treatment-genome (1 - random(mutation - 1))
+        set treatment-genome simple-swap-breed treatment-genome
       ]
 
       Show "## Starting Stage Two Treament ##"
@@ -164,7 +163,7 @@ to mal-reproduce
   [ if state = "senior" AND (count neighbors with [ state = "dead" ]) > 0
     [ let parent-genome genome
       ask one-of neighbors with [ state = "dead" ]
-      [ set genome simple-swap-breed parent-genome
+      [ set genome simple-swap-set-lenght-breed parent-genome malaria-mutation-max-lenght
         set state "junior" ]
     ]
   ]
@@ -242,21 +241,6 @@ mal-genome
 1
 11
 
-SLIDER
-30
-363
-203
-396
-mutation
-mutation
-0
-32
-10.0
-1
-1
-NIL
-HORIZONTAL
-
 BUTTON
 76
 11
@@ -294,7 +278,7 @@ treatment-effectiveness
 treatment-effectiveness
 0
 100
-45.0
+72.0
 1
 1
 NIL
@@ -313,7 +297,7 @@ Dead Malaria
 0.0
 10.0
 true
-false
+true
 "" ""
 PENS
 "Junior Cells" 1.0 0 -13791810 true "" "plot count patches with [ state = \"junior\" ]"
@@ -365,10 +349,10 @@ attribute-4
 11
 
 BUTTON
-19
-99
-193
-132
+23
+148
+197
+181
 Mouse update
 mouse-update
 T
@@ -382,40 +366,40 @@ NIL
 1
 
 CHOOSER
-30
-182
-168
-227
+34
+231
+172
+276
 treatment-one
 treatment-one
 "D1" "D2" "D3" "D4"
-3
+0
 
 CHOOSER
-31
-241
-169
-286
+35
+290
+173
+335
 treatment-two
 treatment-two
 "D1" "D2"
-0
+1
 
 TEXTBOX
-29
-151
-179
-179
+33
+200
+183
+228
 Please Choose two trement options below
 11
 0.0
 1
 
 SWITCH
-30
-329
-204
-362
+34
+378
+208
+411
 drug-mutation-active?
 drug-mutation-active?
 0
@@ -423,14 +407,44 @@ drug-mutation-active?
 -1000
 
 TEXTBOX
-32
-296
-182
-324
+36
+345
+186
+373
 Using the below drug mutation method\n
 11
 0.0
 1
+
+SLIDER
+18
+90
+195
+123
+malaria-mutation-max-lenght
+malaria-mutation-max-lenght
+0
+32
+18.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+34
+412
+207
+445
+mutation
+mutation
+0
+32
+32.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -778,6 +792,34 @@ NetLogo 6.0.4
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
+<experiments>
+  <experiment name="experiment" repetitions="30" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <exitCondition>ticks &lt; 1000</exitCondition>
+    <metric>count patches with [ state = "junior" ]</metric>
+    <metric>count patches with [ state = "senior" ]</metric>
+    <metric>count patches with [ state = "dead" ]</metric>
+    <enumeratedValueSet variable="treatment-one">
+      <value value="&quot;D1&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mutation">
+      <value value="32"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="drug-mutation-active?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="treatment-effectiveness">
+      <value value="72"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="malaria-mutation-max-lenght">
+      <value value="18"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="treatment-two">
+      <value value="&quot;D2&quot;"/>
+    </enumeratedValueSet>
+  </experiment>
+</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default
