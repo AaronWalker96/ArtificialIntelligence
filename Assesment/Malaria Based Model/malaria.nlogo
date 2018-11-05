@@ -1,10 +1,153 @@
-;;This will be the project template for modling humans with malaria
+;; NetLogo solution for modeling Malaria mutations and treatment - Last updated 04/11/2018
+
+;; Team Members:
+;; Aaron Walker - Q5045715
+;; Ryan O’Donnell - Q5273477
+;; Adam Precious - Q5068888
+;; Ladislav Baran - Q5127950
+
+__includes [ "breeding.nls" "logg.nls" ]
+
+patches-own [ genome state ]  ;;Patches own a list of bits representing a binary genome and a state
+globals [ mal-genome treatment-genome attribute-1 attribute-2 attribute-3 attribute-4 treatment-timer genome-length treatment-count ]
+
+;;Set up the model and prepare th environment
+to setup
+  ;;Housekeeping
+  clear-all
+  logg-setup
+  reset-ticks
+
+  ;;Define
+  set genome-length 32
+  set treatment-count 0
+
+  ;;Setup world state
+  setup-patches
+  set treatment-genome generate-genome
+end
+
+;;Set starting state and genome for patches and colour patches in a grid formation
+to setup-patches
+  ask patches
+  [ set genome generate-genome
+    set state "junior"
+  ]
+  colour-grid
+end
+
+;;Set the colours of the grid so that it's easy to see individual patches
+to colour-grid
+  ask patches
+  [ if state = "senior"
+    [ set pcolor 2
+      if pxcor mod 2 = 0 [ set pcolor 3 ]
+      if pycor mod 2 = 0 [ set pcolor 4 ]
+      if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 2 ] ]
+    if state = "junior"
+    [ set pcolor 94
+      if pxcor mod 2 = 0 [ set pcolor 95 ]
+      if pycor mod 2 = 0 [ set pcolor 96 ]
+      if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 94 ] ]
+    if state = "dead"
+    [ set pcolor 15
+      if pxcor mod 2 = 0 [ set pcolor 16 ]
+      if pycor mod 2 = 0 [ set pcolor 17 ]
+      if pxcor mod 2 = 0 and pycor mod 2 = 0 [ set pcolor 15 ] ]
+  ]
+end
+
+;;Generate a random binary genome that is as long as specified by the genome-count global
+to-report generate-genome
+  let new-genome (list)
+  loop
+  [ if length new-genome = genome-length [ report new-genome ]
+    set new-genome lput random 2 new-genome
+  ]
+end
+
+;;Update the monitor for mouse over genome selection (For diag benefit only)
+to mouse-update
+  ask patch mouse-xcor mouse-ycor
+  [ set mal-genome genome
+    set attribute-1 sublist genome 0 8  ;;Update "attribute-1" monitor***
+    set attribute-2 sublist genome 8 16  ;;Update "attribute-2" monitor***
+    set attribute-3 sublist genome 16 24  ;;Update "attribute-3" monitor***
+    set attribute-4 sublist genome 24 32 ] ;;Update "attribute-4" monitor***
+end
+
+to go
+  tick
+
+  ;;Automatic treatment
+  if treatment-timer = introduce-treatment
+  [ new-treatment
+    show "New Treatment has been added..."
+    set treatment-count treatment-count + 1
+    set treatment-timer 0
+  ]
+
+  ;;Age the junior patches
+  ask patches with [ state = "junior" ]
+  [ set state "senior" ]
+
+  ;;Apply anti-malarial
+  apply-treatment
+
+  ;;Update the colours to represent the malaria cells that have been killed off
+  colour-grid
+
+  ;;Stop the 'go' loop if the system has reached goal state
+  if (( count patches with [ state = "dead"] = 0 ) AND ( count patches with [ state = "junior" ] = 0 )) OR ( count patches with [ state = "dead"] = count patches ) [ stop ]
+
+  ;;Log the amount of alive and dead malaria cells
+  logg-append ticks "mal"  (list (count patches with [ state = "dead" ]) (count patches with [ state = "junior" OR state = "senior" ]))
+
+  ;;Allow the alive malaria to reproduce
+  mal-reproduce
+
+  ;;Update the colours to show the new malaria cells
+  colour-grid
+
+  set treatment-timer treatment-timer + 1
+end
+
+;;Apply the treatment to the alive malaria and kill any that don't survive
+to apply-treatment
+  let comparitor (list)
+  ;;Compare each bit of the malaria genome to the treatment and put the true/false result in the new list
+  ;;If the difference is > than the treatment effectiveness slider, kill the malaria
+  ask patches with [ state = "junior" OR state = "senior" ]
+  [ set comparitor (map = genome treatment-genome)
+    if (( length filter [ i -> i = true ] (comparitor) / length comparitor ) * 100 )  < treatment-effectiveness
+    [ set state "dead" ]
+  ]
+end
+
+;;Replace the malaria cells that have been killed off by the treatment
+to mal-reproduce
+  if ( (random 100) < mal-reproduction-rate)
+  [ ask patches
+    [ if state = "senior" AND (count neighbors with [ state = "dead" ]) > 0
+      [ let parent-genome genome
+        ask one-of neighbors with [ state = "dead" ]
+        [ set genome simple-swap-set-length-breed parent-genome mal-mutation-rate
+          set state "junior" ]
+      ]
+    ]
+  ]
+end
+
+;;Introduce a new treatment into the model
+to new-treatment
+  set treatment-genome simple-swap-set-length-breed treatment-genome treatment-mutation-rate
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
 10
-647
-448
+673
+474
 -1
 -1
 13.0
@@ -17,15 +160,325 @@ GRAPHICS-WINDOW
 1
 1
 1
--16
-16
--16
-16
+-17
+17
+-17
+17
 0
 0
 1
 ticks
 30.0
+
+BUTTON
+18
+11
+73
+44
+NIL
+setup
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+134
+11
+189
+44
+NIL
+go
+T
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+MONITOR
+692
+11
+1038
+56
+Selected Genome
+mal-genome
+17
+1
+11
+
+SLIDER
+18
+53
+190
+86
+mal-reproduction-rate
+mal-reproduction-rate
+0
+100
+100.0
+1
+1
+%
+HORIZONTAL
+
+BUTTON
+76
+11
+131
+44
+NIL
+go
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+MONITOR
+692
+66
+1038
+111
+Treatment Genome
+treatment-genome
+17
+1
+11
+
+SLIDER
+19
+221
+191
+254
+treatment-effectiveness
+treatment-effectiveness
+0
+100
+72.0
+1
+1
+NIL
+HORIZONTAL
+
+PLOT
+693
+239
+1040
+389
+Treatment Effectiveness
+Time
+Dead Malaria
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"Junior Cells" 1.0 0 -13791810 true "" "plot count patches with [ state = \"junior\" ]"
+"Senior Cells " 1.0 0 -7500403 true "" "plot count patches with [ state = \"senior\" ] "
+"Dead Cells" 1.0 0 -2674135 true "" "plot count patches with [ state = \"dead\" ] "
+
+MONITOR
+692
+123
+857
+168
+Attribute 1
+attribute-1
+17
+1
+11
+
+MONITOR
+872
+123
+1038
+168
+Attribute 2
+attribute-2
+17
+1
+11
+
+MONITOR
+692
+180
+857
+225
+Attribute 3
+attribute-3
+17
+1
+11
+
+MONITOR
+873
+180
+1039
+225
+Attribute 4
+attribute-4
+17
+1
+11
+
+BUTTON
+18
+293
+192
+326
+Mouse update
+mouse-update
+T
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+SLIDER
+18
+137
+191
+170
+introduce-treatment
+introduce-treatment
+0
+500
+20.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+18
+179
+191
+212
+treatment-mutation-rate
+treatment-mutation-rate
+0
+32
+4.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+18
+95
+190
+128
+mal-mutation-rate
+mal-mutation-rate
+0
+32
+32.0
+1
+1
+NIL
+HORIZONTAL
+
+TEXTBOX
+20
+359
+170
+377
+Key:
+12
+0.0
+1
+
+TEXTBOX
+20
+382
+170
+400
+Blue -
+11
+95.0
+1
+
+TEXTBOX
+58
+381
+208
+399
+Junior malaria cell
+11
+0.0
+1
+
+TEXTBOX
+20
+403
+170
+421
+Grey - 
+11
+4.0
+1
+
+TEXTBOX
+59
+402
+209
+420
+Senior malaria cell\n
+11
+0.0
+1
+
+TEXTBOX
+21
+424
+171
+442
+Red - 
+11
+15.0
+1
+
+TEXTBOX
+57
+423
+207
+441
+Dead malaria cell
+11
+0.0
+1
+
+MONITOR
+693
+404
+824
+449
+Treatment Counter
+treatment-count
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -373,6 +826,68 @@ NetLogo 6.0.4
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
+<experiments>
+  <experiment name="Effectiveness Test" repetitions="1" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <metric>count patches with [ state = "junior" ];</metric>
+    <metric>count patches with [ state = "senior" ];</metric>
+    <metric>count patches with [ state = "dead" ];</metric>
+    <enumeratedValueSet variable="treatment-mutation-rate">
+      <value value="4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="introduce-treatment">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="treatment-effectiveness" first="50" step="2" last="80"/>
+    <enumeratedValueSet variable="mal-reproduction-rate">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mal-mutation-rate">
+      <value value="32"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Treatment Mutaion Test" repetitions="1" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <metric>count patches with [ state = "junior" ];</metric>
+    <metric>count patches with [ state = "senior" ];</metric>
+    <metric>count patches with [ state = "dead" ];</metric>
+    <steppedValueSet variable="treatment-mutation-rate" first="1" step="1" last="10"/>
+    <enumeratedValueSet variable="introduce-treatment">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="treatment-effectiveness">
+      <value value="50"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mal-reproduction-rate">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mal-mutation-rate">
+      <value value="32"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="mal mutation test" repetitions="1" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <metric>count patches with [ state = "junior" ];</metric>
+    <metric>count patches with [ state = "senior" ];</metric>
+    <metric>count patches with [ state = "dead" ];</metric>
+    <enumeratedValueSet variable="treatment-mutation-rate">
+      <value value="4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="introduce-treatment">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="treatment-effectiveness">
+      <value value="50"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mal-reproduction-rate">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="mal-mutation-rate" first="16" step="1" last="32"/>
+  </experiment>
+</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default

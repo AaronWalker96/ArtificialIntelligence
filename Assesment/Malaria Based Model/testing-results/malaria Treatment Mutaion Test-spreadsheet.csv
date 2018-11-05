@@ -1,0 +1,28 @@
+"BehaviorSpace results (NetLogo 6.0.4)"
+"malaria.nlogo"
+"Treatment Mutaion Test"
+"11/04/2018 19:41:50:364 +0000"
+"min-pxcor","max-pxcor","min-pycor","max-pycor"
+"-17","17","-17","17"
+"[run number]","1","1","1","2","2","2","3","3","3","4","4","4","5","5","5","6","6","6","7","7","7","8","8","8","9","9","9","10","10","10"
+"treatment-mutation-rate","1",,,"2",,,"3",,,"4",,,"5",,,"6",,,"7",,,"8",,,"9",,,"10",,
+"introduce-treatment","20",,,"20",,,"20",,,"20",,,"20",,,"20",,,"20",,,"20",,,"20",,,"20",,
+"treatment-effectiveness","50",,,"50",,,"50",,,"50",,,"50",,,"50",,,"50",,,"50",,,"50",,,"50",,
+"mal-reproduction-rate","100",,,"100",,,"100",,,"100",,,"100",,,"100",,,"100",,,"100",,,"100",,,"100",,
+"mal-mutation-rate","32",,,"32",,,"32",,,"32",,,"32",,,"32",,,"32",,,"32",,,"32",,,"32",,
+"[reporter]","count patches with [ state = ""junior"" ];","count patches with [ state = ""senior"" ];","count patches with [ state = ""dead"" ];","count patches with [ state = ""junior"" ];","count patches with [ state = ""senior"" ];","count patches with [ state = ""dead"" ];","count patches with [ state = ""junior"" ];","count patches with [ state = ""senior"" ];","count patches with [ state = ""dead"" ];","count patches with [ state = ""junior"" ];","count patches with [ state = ""senior"" ];","count patches with [ state = ""dead"" ];","count patches with [ state = ""junior"" ];","count patches with [ state = ""senior"" ];","count patches with [ state = ""dead"" ];","count patches with [ state = ""junior"" ];","count patches with [ state = ""senior"" ];","count patches with [ state = ""dead"" ];","count patches with [ state = ""junior"" ];","count patches with [ state = ""senior"" ];","count patches with [ state = ""dead"" ];","count patches with [ state = ""junior"" ];","count patches with [ state = ""senior"" ];","count patches with [ state = ""dead"" ];","count patches with [ state = ""junior"" ];","count patches with [ state = ""senior"" ];","count patches with [ state = ""dead"" ];","count patches with [ state = ""junior"" ];","count patches with [ state = ""senior"" ];","count patches with [ state = ""dead"" ];"
+"[final]","1","1224","0","2","1223","0","3","1222","0","1","1224","0","1","1224","0","10","1215","0","2","1223","0","1","1224","0","1","1224","0","6","1219","0"
+"[min]","1","0","0","2","0","0","3","0","0","1","0","0","1","0","0","10","0","0","2","0","0","1","0","0","1","0","0","6","0","0"
+"[max]","1225","1224","31","1225","1223","33","1225","1222","45","1225","1224","32","1225","1224","34","1225","1215","33","1225","1223","35","1225","1224","53","1225","1224","33","1225","1219","41"
+"[mean]","270.85714285714283","949.7142857142857","4.428571428571429","235.375","985.5","4.125","316.6666666666667","900.8333333333334","7.5","275.2857142857143","945.1428571428571","4.571428571428571","275.42857142857144","944.7142857142857","4.857142857142857","376.8","841.6","6.6","310.6666666666667","908.5","5.833333333333333","325.3333333333333","890.8333333333334","8.833333333333334","311.3333333333333","908.1666666666666","5.5","325","893.1666666666666","6.833333333333333"
+"[steps]","6","6","6","7","7","7","5","5","5","6","6","6","6","6","6","4","4","4","5","5","5","5","5","5","5","5","5","5","5","5"
+
+"[all run data]","count patches with [ state = ""junior"" ];","count patches with [ state = ""senior"" ];","count patches with [ state = ""dead"" ];","count patches with [ state = ""junior"" ];","count patches with [ state = ""senior"" ];","count patches with [ state = ""dead"" ];","count patches with [ state = ""junior"" ];","count patches with [ state = ""senior"" ];","count patches with [ state = ""dead"" ];","count patches with [ state = ""junior"" ];","count patches with [ state = ""senior"" ];","count patches with [ state = ""dead"" ];","count patches with [ state = ""junior"" ];","count patches with [ state = ""senior"" ];","count patches with [ state = ""dead"" ];","count patches with [ state = ""junior"" ];","count patches with [ state = ""senior"" ];","count patches with [ state = ""dead"" ];","count patches with [ state = ""junior"" ];","count patches with [ state = ""senior"" ];","count patches with [ state = ""dead"" ];","count patches with [ state = ""junior"" ];","count patches with [ state = ""senior"" ];","count patches with [ state = ""dead"" ];","count patches with [ state = ""junior"" ];","count patches with [ state = ""senior"" ];","count patches with [ state = ""dead"" ];","count patches with [ state = ""junior"" ];","count patches with [ state = ""senior"" ];","count patches with [ state = ""dead"" ];"
+,"1225","0","0","1225","0","0","1225","0","0","1225","0","0","1225","0","0","1225","0","0","1225","0","0","1225","0","0","1225","0","0","1225","0","0"
+,"476","718","31","469","723","33","466","714","45","483","710","32","493","698","34","475","717","33","459","731","35","497","675","53","483","709","33","493","691","41"
+,"150","1075","0","144","1081","0","155","1070","0","158","1067","0","155","1070","0","142","1083","0","134","1091","0","175","1050","0","130","1095","0","180","1045","0"
+,"35","1190","0","31","1194","0","42","1183","0","46","1179","0","36","1189","0","32","1193","0","36","1189","0","44","1181","0","26","1199","0","33","1192","0"
+,"7","1218","0","7","1218","0","9","1216","0","11","1214","0","15","1210","0","10","1215","0","8","1217","0","10","1215","0","3","1222","0","13","1212","0"
+,"2","1223","0","3","1222","0","3","1222","0","3","1222","0","3","1222","0",,,,"2","1223","0","1","1224","0","1","1224","0","6","1219","0"
+,"1","1224","0","2","1223","0",,,,"1","1224","0","1","1224","0",,,,,,,,,,,,,,,
+,,,,"2","1223","0",,,,,,,,,,,,,,,,,,,,,,,,
