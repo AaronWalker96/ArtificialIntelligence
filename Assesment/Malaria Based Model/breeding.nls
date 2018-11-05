@@ -1,34 +1,5 @@
-;;Selectes a random length of bits from a given genome and reserves their order
-to-report simple-swap-breed-old [genomeIn]
-
-  let glength length genomeIn - 1
-  
-  let swap-start-point  random(glength)
-  let swap-end-point (swap-start-point + random (glength - swap-start-point)) + 1
-
-  let swap-partion reverse (sublist genomeIn swap-start-point swap-end-point)
-  let beginging-partion (list)
-  let end-partion (list)
-  let begining? 0
-  let end? 0
- 
-  ifelse swap-start-point = 0 [set begining? 0][set begining? 1]
-  ifelse swap-end-point = glength [set end? 0][set end? 1]
-
-  if begining? = 1 [set beginging-partion sublist genomeIn 0 swap-start-point]
-  if end? = 1 [set end-partion sublist genomeIn swap-end-point (glength + 1)]
-
-  let non-flat (list beginging-partion swap-partion end-partion)
-  let comp reduce sentence non-flat
-
-  show length genomeIn
-  show length comp
-  
-  report comp
-end
-
+;;Take a random set of bits and reverse them, simplified version of transpose from the binary genome mutation paper
 to-report simple-swap-breed [genomeIn]
-
   let glength length genomeIn - 1
   
   let swap-start-point  random(glength)
@@ -51,10 +22,9 @@ to-report simple-swap-breed [genomeIn]
       if length genomeIn != length comp [show "HAS BROKEN"]
       report comp]
   ]
-  
 end
 
-;;Selectes a random bit and flips it
+;;Selects a random bit and flips it
 to-report change-random-bit[genomeIn]
  let glength length genomeIn - 1
  let random-bit  random(glength)
@@ -82,4 +52,37 @@ to-report change-random-bit-n-times[genomeIn n]
     set newGenome replace-item random-bit newGenome bit
   ]
   report newGenome
+end
+
+;;Take a random specified length of bits and reverse them, simplified version of transpose from the binary genome mutation paper
+to-report simple-swap-set-length-breed [genomeIn setlength]
+  let glength length genomeIn - 1
+
+  let swap-start-point  random(glength)
+  let swap-end-point 0
+  ifelse((swap-start-point <= (glength - setlength)))
+  [
+    set swap-end-point (swap-start-point + setlength)
+  ]
+  [
+    set swap-end-point glength
+  ]
+
+  let swap-partion reverse (sublist genomeIn swap-start-point swap-end-point)
+
+  let swap-index 0
+  let local-index swap-start-point
+  let comp genomeIn
+
+  loop
+  [
+    set comp replace-item local-index comp (item swap-index swap-partion)
+
+    set swap-index swap-index + 1
+    set local-index local-index + 1
+
+    if local-index = swap-end-point [
+      if length genomeIn != length comp [show "HAS BROKEN"]
+      report comp]
+  ]
 end

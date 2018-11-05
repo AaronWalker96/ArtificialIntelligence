@@ -1,11 +1,15 @@
-;;Solution for modeling Malaria mutations and treatment in NetLogo
-;;Last updated 21/10/2018 by Aaron Walker - Q5045715
+;; NetLogo solution for modeling Malaria mutations and treatment - Last updated 04/11/2018
+
+;; Team Members:
+;; Aaron Walker - Q5045715
+;; Ryan O’Donnell - Q5273477
+;; Adam Precious - Q5068888
+;; Ladislav Baran - Q5127950
 
 __includes [ "breeding.nls" "logg.nls" ]
 
-
 patches-own [ genome state ]  ;;Patches own a list of bits representing a binary genome and a state
-globals [ mal-genome treatment-genome attribute-1 attribute-2 attribute-3 attribute-4 treatment-timer genome-length ]
+globals [ mal-genome treatment-genome attribute-1 attribute-2 attribute-3 attribute-4 treatment-timer genome-length treatment-count ]
 
 ;;Set up the model and prepare th environment
 to setup
@@ -16,6 +20,7 @@ to setup
 
   ;;Define
   set genome-length 32
+  set treatment-count 0
 
   ;;Setup world state
   setup-patches
@@ -78,6 +83,7 @@ to go
   if treatment-timer = introduce-treatment
   [ new-treatment
     show "New Treatment has been added..."
+    set treatment-count treatment-count + 1
     set treatment-timer 0
   ]
 
@@ -88,6 +94,7 @@ to go
   ;;Apply anti-malarial
   apply-treatment
 
+  ;;Update the colours to represent the malaria cells that have been killed off
   colour-grid
 
   ;;Stop the 'go' loop if the system has reached goal state
@@ -99,6 +106,7 @@ to go
   ;;Allow the alive malaria to reproduce
   mal-reproduce
 
+  ;;Update the colours to show the new malaria cells
   colour-grid
 
   set treatment-timer treatment-timer + 1
@@ -118,20 +126,21 @@ end
 
 ;;Replace the malaria cells that have been killed off by the treatment
 to mal-reproduce
-  if ( (random 100) * 2 > treatment-effectiveness)
+  if ( (random 100) < mal-reproduction-rate)
   [ ask patches
     [ if state = "senior" AND (count neighbors with [ state = "dead" ]) > 0
       [ let parent-genome genome
         ask one-of neighbors with [ state = "dead" ]
-        [ set genome simple-swap-breed parent-genome
+        [ set genome simple-swap-set-length-breed parent-genome mal-mutation-rate
           set state "junior" ]
       ]
     ]
   ]
 end
 
+;;Introduce a new treatment into the model
 to new-treatment
-  set treatment-genome change-random-bit-n-times treatment-genome 8
+  set treatment-genome simple-swap-set-length-breed treatment-genome treatment-mutation-rate
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -208,17 +217,17 @@ mal-genome
 
 SLIDER
 18
-61
-191
-94
-mutation
-mutation
+53
+190
+86
+mal-reproduction-rate
+mal-reproduction-rate
 0
-32
-28.0
+100
+100.0
 1
 1
-NIL
+%
 HORIZONTAL
 
 BUTTON
@@ -240,9 +249,9 @@ NIL
 
 MONITOR
 692
-75
+66
 1038
-120
+111
 Treatment Genome
 treatment-genome
 17
@@ -250,10 +259,10 @@ treatment-genome
 11
 
 SLIDER
-18
-108
+19
+221
 191
-141
+254
 treatment-effectiveness
 treatment-effectiveness
 0
@@ -266,9 +275,9 @@ HORIZONTAL
 
 PLOT
 693
-274
+239
 1040
-424
+389
 Treatment Effectiveness
 Time
 Dead Malaria
@@ -285,10 +294,10 @@ PENS
 "Dead Cells" 1.0 0 -2674135 true "" "plot count patches with [ state = \"dead\" ] "
 
 MONITOR
-751
-139
+692
+123
 857
-184
+168
 Attribute 1
 attribute-1
 17
@@ -297,9 +306,9 @@ attribute-1
 
 MONITOR
 872
-139
-978
-184
+123
+1038
+168
 Attribute 2
 attribute-2
 17
@@ -307,10 +316,10 @@ attribute-2
 11
 
 MONITOR
-751
-205
+692
+180
 857
-250
+225
 Attribute 3
 attribute-3
 17
@@ -319,9 +328,9 @@ attribute-3
 
 MONITOR
 873
-205
-979
-250
+180
+1039
+225
 Attribute 4
 attribute-4
 17
@@ -330,9 +339,9 @@ attribute-4
 
 BUTTON
 18
-201
+293
 192
-234
+326
 Mouse update
 mouse-update
 T
@@ -347,9 +356,9 @@ NIL
 
 SLIDER
 18
-154
-192
-187
+137
+191
+170
 introduce-treatment
 introduce-treatment
 0
@@ -359,6 +368,117 @@ introduce-treatment
 1
 NIL
 HORIZONTAL
+
+SLIDER
+18
+179
+191
+212
+treatment-mutation-rate
+treatment-mutation-rate
+0
+32
+4.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+18
+95
+190
+128
+mal-mutation-rate
+mal-mutation-rate
+0
+32
+32.0
+1
+1
+NIL
+HORIZONTAL
+
+TEXTBOX
+20
+359
+170
+377
+Key:
+12
+0.0
+1
+
+TEXTBOX
+20
+382
+170
+400
+Blue -
+11
+95.0
+1
+
+TEXTBOX
+58
+381
+208
+399
+Junior malaria cell
+11
+0.0
+1
+
+TEXTBOX
+20
+403
+170
+421
+Grey - 
+11
+4.0
+1
+
+TEXTBOX
+59
+402
+209
+420
+Senior malaria cell\n
+11
+0.0
+1
+
+TEXTBOX
+21
+424
+171
+442
+Red - 
+11
+15.0
+1
+
+TEXTBOX
+57
+423
+207
+441
+Dead malaria cell
+11
+0.0
+1
+
+MONITOR
+693
+404
+824
+449
+Treatment Counter
+treatment-count
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -706,6 +826,68 @@ NetLogo 6.0.4
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
+<experiments>
+  <experiment name="Effectiveness Test" repetitions="1" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <metric>count patches with [ state = "junior" ];</metric>
+    <metric>count patches with [ state = "senior" ];</metric>
+    <metric>count patches with [ state = "dead" ];</metric>
+    <enumeratedValueSet variable="treatment-mutation-rate">
+      <value value="4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="introduce-treatment">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="treatment-effectiveness" first="50" step="2" last="80"/>
+    <enumeratedValueSet variable="mal-reproduction-rate">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mal-mutation-rate">
+      <value value="32"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Treatment Mutaion Test" repetitions="1" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <metric>count patches with [ state = "junior" ];</metric>
+    <metric>count patches with [ state = "senior" ];</metric>
+    <metric>count patches with [ state = "dead" ];</metric>
+    <steppedValueSet variable="treatment-mutation-rate" first="1" step="1" last="10"/>
+    <enumeratedValueSet variable="introduce-treatment">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="treatment-effectiveness">
+      <value value="50"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mal-reproduction-rate">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mal-mutation-rate">
+      <value value="32"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="mal mutation test" repetitions="1" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <metric>count patches with [ state = "junior" ];</metric>
+    <metric>count patches with [ state = "senior" ];</metric>
+    <metric>count patches with [ state = "dead" ];</metric>
+    <enumeratedValueSet variable="treatment-mutation-rate">
+      <value value="4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="introduce-treatment">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="treatment-effectiveness">
+      <value value="50"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mal-reproduction-rate">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="mal-mutation-rate" first="16" step="1" last="32"/>
+  </experiment>
+</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default
